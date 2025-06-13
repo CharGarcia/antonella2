@@ -176,4 +176,10 @@ class EstablecimientoController extends Controller
 
         return response()->json($establecimiento);
     }
+
+    public function cambiar(Request $request)
+    {
+        session(['establecimiento_id' => $request->establecimiento_id]);
+        return response()->json(['success' => true]);
+    }
 }

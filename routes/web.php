@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\AsignacionEstablecimientoUsuarioController;
 use App\Http\Controllers\Admin\AsignacionEstablecimientoUsuarioAdminController;
 use App\Http\Controllers\Auth\RegistroController;
 use App\Http\Controllers\Admin\UsuarioAsignadoController;
+use App\Http\Controllers\empresa\ClienteController;
 
 
 Route::get('/', function () {
@@ -33,12 +34,38 @@ Route::middleware([
     })->name('home');
 });
 
-//para registrar los datos del nuevo usuario cuando le envian el link desde crear usuarios
+
+//ruta para pruebas
+/* Route::get('/menu/{opcional?}', function ($opcional = null) {
+    return view('errors.404');
+})->where('opcional', '.*')->name('menu.placeholder'); */
+
+
+
+//para cargar el select de las empresas
+Route::post('/establecimiento/cambiar', [EstablecimientoController::class, 'cambiar'])->name('establecimiento.cambiar');
+
+
+//para registrar los datos del nuevo usuario cuando le envian el link desde crear usuarios nuevos
 Route::get('completar-registro/{token}', [RegistroController::class, 'mostrarFormulario'])->name('completar-registro.formulario');
 Route::post('completar-registro/{token}', [RegistroController::class, 'guardarDatos'])->name('completar-registro.guardar');
 
 
-// routes/web.php
+// para clientes
+Route::middleware(['auth'])
+    ->prefix('empresa/clientes')
+    ->name('clientes.')
+    ->middleware('can:gestionar-clientes') // ajusta el permiso si es necesario
+    ->group(function () {
+        Route::get('/', [ClienteController::class, 'index'])->name('clientes');
+        Route::get('/data', [ClienteController::class, 'getData'])->name('data'); // opcional para DataTables
+        Route::get('/crear', [ClienteController::class, 'create'])->name('create');
+        Route::post('/', [ClienteController::class, 'store'])->name('store');
+        Route::get('/{cliente}/editar', [ClienteController::class, 'edit'])->name('edit');
+        Route::put('/{cliente}', [ClienteController::class, 'update'])->name('update');
+        Route::delete('/{cliente}', [ClienteController::class, 'destroy'])->name('destroy');
+    });
+
 
 //rutas para asignar usuarios a usuarios admin
 Route::middleware(['auth'])

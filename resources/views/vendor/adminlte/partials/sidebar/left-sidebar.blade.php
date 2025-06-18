@@ -6,6 +6,12 @@
     @else
         @include('adminlte::partials.common.brand-logo-xs')
     @endif
+<script>
+    window.appData = {
+        setSubmenuUrl: "{{ route('submenu.set') }}",
+        csrfToken: "{{ csrf_token() }}"
+    };
+</script>
 
     {{-- Sidebar menu --}}
     <div class="sidebar">
@@ -37,25 +43,26 @@
                                 </a>
 
                                 <ul class="nav nav-treeview">
-                                    @foreach ($menu->submenus as $submenu)
-                                        @php $ruta = $submenu->ruta; @endphp
-                                        <li class="nav-item">
-                                            @if(Route::has($ruta))
-                                                <a href="{{ route($ruta) }}"
-                                                class="nav-link border border-primary rounded px-3 py-1 mb-1
-                                                        {{ request()->routeIs($ruta) ? 'active bg-primary text-white' : 'text-primary bg-white' }}">
-                                                    <i class="{{ $submenu->icono ?? 'far fa-circle' }} nav-icon me-2
-                                                        {{ request()->routeIs($ruta) ? 'text-white' : 'text-primary' }}"></i>
-                                                    <p class="mb-0">{{ $submenu->nombre }}</p>
-                                                </a>
-                                            @else
-                                                <a href="#" class="nav-link disabled border border-secondary rounded px-3 py-1 mb-1 text-muted">
-                                                    <i class="{{ $submenu->icono ?? 'far fa-circle' }} nav-icon me-2"></i>
-                                                    <p class="mb-0">{{ $submenu->nombre }}</p>
-                                                </a>
-                                            @endif
-                                        </li>
-                                    @endforeach
+                                @foreach ($menu->submenus as $submenu)
+                                    @php $ruta = $submenu->ruta; @endphp
+                                    <li class="nav-item">
+                                        @if(Route::has($ruta))
+                                            <a href="{{ route($ruta) }}"
+                                            class="nav-link submenu-link border border-primary rounded px-3 py-1 mb-1
+                                                {{ request()->routeIs($ruta) ? 'active bg-primary text-white' : 'text-primary bg-white' }}"
+                                            data-submenu-id="{{ $submenu->id }}">
+                                                <i class="{{ $submenu->icono ?? 'far fa-circle' }} nav-icon me-2
+                                                {{ request()->routeIs($ruta) ? 'text-white' : 'text-primary' }}"></i>
+                                                <p class="mb-0">{{ $submenu->nombre }}</p>
+                                            </a>
+                                        @else
+                                            <a href="#" class="nav-link disabled border border-secondary rounded px-3 py-1 mb-1 text-muted">
+                                                <i class="{{ $submenu->icono ?? 'far fa-circle' }} nav-icon me-2"></i>
+                                                <p class="mb-0">{{ $submenu->nombre }}</p>
+                                            </a>
+                                        @endif
+                                    </li>
+                                @endforeach
                                 </ul>
                             </li>
                         @endif
@@ -65,3 +72,32 @@
         </nav>
     </div>
 </aside>
+<script>
+   document.addEventListener('DOMContentLoaded', function () {
+    $(document).on('click', '.submenu-link', function (e) {
+        e.preventDefault();
+
+        const submenuId = $(this).data('submenu-id');
+        const href = $(this).attr('href');
+
+        if (submenuId && href) {
+            $.ajax({
+                url: window.appData.setSubmenuUrl,
+                type: 'POST',
+                data: {
+                    _token: window.appData.csrfToken,
+                    submenu_id: submenuId
+                },
+                success: function () {
+                    window.location.href = href;
+                },
+                error: function (xhr) {
+                    const message = xhr.responseJSON?.message || 'Error al cambiar de submenú.';
+                    Swal.fire('Error', message, 'error');
+                }
+            });
+        }
+    });
+});
+
+</script>

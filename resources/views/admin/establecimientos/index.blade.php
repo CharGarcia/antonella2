@@ -447,9 +447,6 @@ $(document).ready(function () {
     });
 });
 
-
-
-
         // Editar
         $(document).on('click', '.editar-establecimiento', function () {
             const id = $(this).data('id');

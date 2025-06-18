@@ -179,7 +179,23 @@ class EstablecimientoController extends Controller
 
     public function cambiar(Request $request)
     {
-        session(['establecimiento_id' => $request->establecimiento_id]);
-        return response()->json(['success' => true]);
+        //session(['establecimiento_id' => $request->establecimiento_id]);
+        //return response()->json(['success' => true]);
+        $request->validate([
+            'establecimiento_id' => 'required|exists:establecimientos,id',
+        ]);
+
+        $establecimiento = Establecimiento::findOrFail($request->establecimiento_id);
+
+        session([
+            'establecimiento_id' => $establecimiento->id,
+            'establecimiento_nombre' => $establecimiento->nombre_comercial,
+        ]);
+
+        // Confirmación
+        return response()->json([
+            'success' => true,
+            'data' => session()->only(['establecimiento_id', 'establecimiento_nombre'])
+        ]);
     }
 }

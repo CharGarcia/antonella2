@@ -20,7 +20,6 @@ class UsuariosController extends Controller
     public function getUsers(Request $request)
     {
         $rol = $request->input('columns.3.search.value'); // Filtro por rol
-
         $users = User::with('roles:id,name')
             ->select('id', 'name', 'cedula', 'email', 'status');
 
@@ -34,7 +33,6 @@ class UsuariosController extends Controller
         if ($status !== null && $status !== '') {
             $users->where('status', $status);
         }
-
 
         return datatables()->of($users)
             ->addColumn('roles', function ($user) {

@@ -6,6 +6,9 @@ use App\Models\Submenu;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
 
 class SubmenuController extends Controller
 {
@@ -17,7 +20,7 @@ class SubmenuController extends Controller
         return view('admin.submenus.index');
     }
 
-      public function getSubmenus(Request $request)
+    public function getSubmenus(Request $request)
     {
         $query = Submenu::select('submenus.*', 'menus.nombre as nombre_menu')
             ->join('menus', 'submenus.menu_id', '=', 'menus.id');
@@ -72,5 +75,42 @@ class SubmenuController extends Controller
     {
         $submenu->delete();
         return response()->json(['message' => 'Submenú eliminado']);
+    }
+
+
+    public function set(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Usuario no autenticado.'], 401);
+        }
+
+        $submenuId = $request->submenu_id;
+        $establecimientoId = session('establecimiento_id');
+
+        if (!$establecimientoId) {
+            return response()->json(['success' => false, 'message' => 'Establecimiento no definido en la sesión.'], 400);
+        }
+
+        // Si es super admin, permitir siempre, sino hay que darle permiso por ejemplo gestionar-clientes
+        if ($user->hasRole('super_admin')) {
+            session(['submenu_id' => $submenuId]);
+            return response()->json(['success' => true]);
+        }
+
+        // Validar permisos para usuarios normales
+        $permiso = DB::table('submenu_establecimiento_usuario')
+            ->where('user_id', $user->id)
+            ->where('submenu_id', $submenuId)
+            ->where('establecimiento_id', $establecimientoId)
+            ->first();
+
+        if ($permiso) {
+            session(['submenu_id' => $submenuId]);
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'No tiene permiso para acceder a este módulo.'], 403);
     }
 }

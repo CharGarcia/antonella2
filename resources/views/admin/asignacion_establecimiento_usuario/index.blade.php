@@ -254,6 +254,7 @@ $(document).on('click', '.modulos-asignacion', function () {
 
 
 // Aplicar perfil guardado
+/*
 $(document).on('click', '#btn-aplicar-perfil', function () {
     const perfil = new URLSearchParams(localStorage.getItem('ultimo_perfil_permisos'));
     for (const [key, value] of perfil.entries()) {
@@ -264,6 +265,7 @@ $(document).on('click', '#btn-aplicar-perfil', function () {
     }
     $(this).closest('.alert').remove();
 });
+*/
 
 
 //Guardar permisos desde el formulario

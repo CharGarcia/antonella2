@@ -168,26 +168,41 @@ class AsignacionEstablecimientoUsuarioController extends Controller
             ->get()
             ->groupBy('menu_nombre');
 
-        $permisos = DB::table('submenu_establecimiento_usuario')
+        $permisosAsignados = DB::table('submenu_establecimiento_usuario')
             ->where('user_id', $relacion->user_id)
             ->where('establecimiento_id', $relacion->establecimiento_id)
             ->get()
             ->keyBy('submenu_id');
 
-        return view('admin.asignacion_establecimiento_usuario.partials.tabla_permisos', compact('submenus', 'permisos'));
+        return view('admin.asignacion_establecimiento_usuario.partials.tabla_permisos', [
+            'submenus' => $submenus,
+            'permisosAsignados' => $permisosAsignados
+        ]);
     }
 
     public function guardarPermisos(Request $request)
     {
         $relacion = DB::table('establecimiento_usuario')->find($request->usuario_establecimiento_id);
+
+        if (!$relacion) {
+            return response()->json(['success' => false, 'message' => 'Relación no encontrada.'], 404);
+        }
+
         $user_id = $relacion->user_id;
         $establecimiento_id = $relacion->establecimiento_id;
 
+        // Limpiar permisos anteriores
         DB::table('submenu_establecimiento_usuario')
             ->where('user_id', $user_id)
             ->where('establecimiento_id', $establecimiento_id)
             ->delete();
 
+        // Validación defensiva
+        if (!is_array($request->permisos)) {
+            return response()->json(['success' => false, 'message' => 'No se enviaron permisos válidos.'], 422);
+        }
+
+        // Guardar nuevos permisos
         foreach ($request->permisos as $submenu_id => $acciones) {
             DB::table('submenu_establecimiento_usuario')->insert([
                 'user_id' => $user_id,
@@ -202,6 +217,6 @@ class AsignacionEstablecimientoUsuarioController extends Controller
             ]);
         }
 
-        return response()->json(['success' => true]);
+        return response()->json(['success' => true, 'message' => 'Permisos actualizados correctamente.']);
     }
 }

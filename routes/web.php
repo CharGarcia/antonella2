@@ -23,7 +23,6 @@ Route::get('/', function () {
 });
 
 
-
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
@@ -33,14 +32,6 @@ Route::middleware([
         return view('home');
     })->name('home');
 });
-
-
-//ruta para pruebas
-/* Route::get('/menu/{opcional?}', function ($opcional = null) {
-    return view('errors.404');
-})->where('opcional', '.*')->name('menu.placeholder'); */
-
-
 
 //para cargar el select de las empresas
 Route::post('/establecimiento/cambiar', [EstablecimientoController::class, 'cambiar'])->name('establecimiento.cambiar');
@@ -52,19 +43,21 @@ Route::post('completar-registro/{token}', [RegistroController::class, 'guardarDa
 
 
 // para clientes
-Route::middleware(['auth'])
+//permiso admin user: gestionar-clientes
+Route::middleware(['auth', 'verificar.permisos.submenu', 'can:gestionar-clientes'])
     ->prefix('empresa/clientes')
     ->name('clientes.')
-    ->middleware('can:gestionar-clientes') // ajusta el permiso si es necesario
     ->group(function () {
         Route::get('/', [ClienteController::class, 'index'])->name('clientes');
-        Route::get('/data', [ClienteController::class, 'getData'])->name('data'); // opcional para DataTables
+        Route::get('/data', [ClienteController::class, 'getData'])->name('data');
         Route::get('/crear', [ClienteController::class, 'create'])->name('create');
         Route::post('/', [ClienteController::class, 'store'])->name('store');
         Route::get('/{cliente}/editar', [ClienteController::class, 'edit'])->name('edit');
         Route::put('/{cliente}', [ClienteController::class, 'update'])->name('update');
         Route::delete('/{cliente}', [ClienteController::class, 'destroy'])->name('destroy');
+        Route::get('/buscar-identificacion', [ClienteController::class, 'buscarPorIdentificacion'])->name('buscarPorIdentificacion');
     });
+
 
 
 //rutas para asignar usuarios a usuarios admin
@@ -73,18 +66,15 @@ Route::middleware(['auth'])
     ->name('usuario_asignado.')
     ->middleware('can:gestionar-usuario-asignado')
     ->group(function () {
-        // Muestra la vista principal con la tabla
         Route::get('/', [UsuarioAsignadoController::class, 'index'])->name('index');
-        // Endpoint para DataTables (server-side)
         Route::get('/data', [UsuarioAsignadoController::class, 'getData'])->name('data');
-        // Asignar un usuario al admin logueado
         Route::post('/asignar', [UsuarioAsignadoController::class, 'store'])->name('store');
-        // Quitar la asignación
         Route::delete('/eliminar/{id}', [UsuarioAsignadoController::class, 'destroy'])->name('eliminar');
     });
 
 
 //para asignar establecimientos a usuarios administrados por admin
+//permiso admin: gestionar-asignacionestablecimientousuario-admin
 Route::middleware(['auth'])
     ->prefix('asignacion_establecimiento_usuario_admin')
     ->name('asignacion_establecimiento_usuario_admin.')
@@ -98,7 +88,6 @@ Route::middleware(['auth'])
         Route::post('/permisos', [AsignacionEstablecimientoUsuarioAdminController::class, 'verPermisos'])->name('permisos');
         Route::post('/permisos/guardar', [AsignacionEstablecimientoUsuarioAdminController::class, 'guardarPermisos'])->name('guardar_permisos');
     });
-
 
 
 //para asignar establecimientos a los usuarios de super_admin
@@ -147,13 +136,9 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('establecimientos')->name('establecimientos.')->middleware('can:gestionar-establecimientos')->group(function () {
         Route::get('/', [EstablecimientoController::class, 'index'])->name('index');
         Route::get('/data', [EstablecimientoController::class, 'getData'])->name('data');
-        // Crear
         Route::post('/store', [EstablecimientoController::class, 'store'])->name('store');
-        // Editar (traer datos vía AJAX)
         Route::get('/edit/{id}', [EstablecimientoController::class, 'edit'])->name('edit');
-        // Actualizar (POST con _method=PUT desde AJAX)
         Route::put('/update/{establecimiento}', [EstablecimientoController::class, 'update'])->name('update');
-        // Mostrar (debe estar al final para evitar conflicto con /edit/{id})
         Route::get('/{establecimiento}', [EstablecimientoController::class, 'show'])->name('show');
     });
 });
@@ -193,8 +178,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{submenu}', [SubmenuController::class, 'show'])->name('show');
         Route::delete('/{submenu}', [SubmenuController::class, 'destroy'])->name('destroy');
     });
+    // Ruta general para establecer submenu activo
+    Route::post('/submenu/set', [SubmenuController::class, 'set'])->name('submenu.set');
 });
-
 
 
 //para gestionar roles de usuarios

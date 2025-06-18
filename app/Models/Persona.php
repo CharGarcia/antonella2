@@ -30,6 +30,8 @@ class Persona extends Model
         'tipo_cuenta',
         'numero_cuenta',
         'genero',
+        'provincia',
+        'ciudad',
         'fecha_nacimiento',
         'estado',
     ];
@@ -54,7 +56,7 @@ class Persona extends Model
 
     public function vendedor()
     {
-        return $this->belongsTo(Vendedor::class, 'id_vendedor');
+        return $this->belongsTo(User::class, 'id_vendedor');
     }
 
     public function banco()

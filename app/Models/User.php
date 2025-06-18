@@ -10,6 +10,23 @@ use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
+/**
+ * App\Models\User
+ *
+ * @property int $id
+ * @property string $name
+ * @property string $email
+ * ...
+ *
+ * @method bool hasRole(string|array|\Spatie\Permission\Contracts\Role $roles)
+ * @method bool hasAnyRole(string|array|\Spatie\Permission\Contracts\Role ...$roles)
+ * @method \Illuminate\Support\Collection getRoleNames()
+ * @method $this assignRole(...$roles)
+ * @method $this removeRole(...$roles)
+ * @method bool hasPermissionTo(string|\Spatie\Permission\Contracts\Permission $permission)
+ */
+
+
 
 class User extends Authenticatable
 {

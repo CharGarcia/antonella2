@@ -4,7 +4,7 @@
 @inject('preloaderHelper', 'JeroenNoten\LaravelAdminLte\Helpers\PreloaderHelper')
 
 @section('adminlte_css')
-@livewireStyles
+    @livewireStyles
     @stack('css')
     @yield('css')
 @stop
@@ -52,9 +52,33 @@
 @stop
 
 @section('adminlte_js')
-@livewireScripts
+    @livewireScripts
     <livewire:chatbot />
     @stack('js')
     @yield('js')
-@stop
 
+    {{-- SweetAlert2 Toast Notifications --}}
+    @php
+        $alertTypes = ['success', 'error', 'warning', 'info'];
+    @endphp
+
+    @foreach($alertTypes as $type)
+        @if(session($type))
+            <script>
+    Swal.fire({
+        icon: '{{ $type }}',
+        title: '{{ ucfirst($type) }}',
+        text: '{{ session($type) }}',
+        position: 'center',
+        customClass: {
+            popup: 'swal-wide'
+        },
+        timer: 3000,
+        timerProgressBar: true,
+        showConfirmButton: false
+    });
+</script>
+
+        @endif
+    @endforeach
+@stop

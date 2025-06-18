@@ -82,6 +82,11 @@
                 <i class="fas fa-list-alt mr-2"></i> Asignar establecimiento
             </a>
         @endcan
+        @can('gestionar-usuarios')
+         <a href="{{ route('usuarios.index') }}" class="btn btn-outline-primary d-flex align-items-center mb-2">
+                <i class="fas fa-universal-access mr-2"></i> Gestión de usuarios
+            </a>
+            @endcan
     @endhasrole
     </div>
 </aside>

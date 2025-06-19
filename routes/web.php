@@ -203,14 +203,17 @@ Route::middleware(['auth'])->group(function () {
 });
 
 //para gestionar los usuarios
+// permiso admin: gestionar-usuarios
 Route::middleware(['auth'])->group(function () {
     Route::prefix('usuarios')->name('usuarios.')->middleware('can:gestionar-usuarios')->group(function () {
         Route::get('/', [UsuariosController::class, 'index'])->name('index');
         Route::get('/data', [UsuariosController::class, 'getUsers'])->name('data');
         Route::post('/update-status', [UsuariosController::class, 'updateStatus'])->name('update-status');
         Route::post('/', [UsuariosController::class, 'store'])->name('store');
+        Route::post('/{id}/reenviar-correo', [UsuariosController::class, 'reenviarCorreo'])->name('reenviar-correo');
     });
 });
+
 
 //rutas para retenciones_sri
 Route::middleware(['auth'])->group(function () {

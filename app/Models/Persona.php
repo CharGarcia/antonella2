@@ -24,8 +24,6 @@ class Persona extends Model
         'tipo',
         'tipo_empresa',
         'nombre_comercial',
-        'plazo_credito',
-        'parte_relacionada',
         'id_banco',
         'tipo_cuenta',
         'numero_cuenta',

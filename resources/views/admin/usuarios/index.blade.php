@@ -25,6 +25,7 @@
                         <th>Nombre</th>
                         <th>Cédula</th>
                         <th>Correo</th>
+                        <th>Reenvio</th>
                         <th>Rol asignado</th>
                         <th class="text-center">Status</th>
                     </tr>
@@ -32,6 +33,7 @@
                         <th><input type="text" class="form-control form-control-sm" placeholder="Nombre de usuario" /></th>
                         <th><input type="text" class="form-control form-control-sm" placeholder="Cédula de usuario" /></th>
                         <th><input type="text" class="form-control form-control-sm" placeholder="Correo de usuario" /></th>
+                        <th></th>
                         <th>
                             <select class="form-control form-control-sm">
                                 <option value="">Todos</option>
@@ -53,6 +55,7 @@
         </div>
     </div>
     </div>
+
 @stop
 
 @section('js')
@@ -80,6 +83,7 @@ $(function () {
                             { data: 'name', name: 'name' },
                             { data: 'cedula', name: 'cedula' },
                             { data: 'email', name: 'email' },
+                            { data: 'acciones', name: 'acciones', orderable: false, searchable: false },
                             { data: 'roles', name: 'roles.name', orderable: false, searchable: false},
                             { data: 'status', name: 'status'},
             ],
@@ -237,5 +241,68 @@ $(document).ready(function () {
         });
     });
 });
+
+$(document).on('click', '.reenviar-correo', function () {
+    let userId = $(this).data('id');
+    let currentEmail = $(this).data('email');
+
+    Swal.fire({
+        title: 'Reenviar invitación',
+        input: 'email',
+        inputLabel: 'Confirma o corrige el correo',
+        inputValue: currentEmail,
+        showCancelButton: true,
+        confirmButtonText: 'Reenviar',
+        cancelButtonText: 'Cancelar',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        allowEnterKey: false,
+        inputValidator: (value) => {
+            if (!value || !/^\S+@\S+\.\S+$/.test(value)) {
+                return 'Ingresa un correo válido';
+            }
+        },
+        didOpen: () => {
+            Swal.getConfirmButton().disabled = false;
+        },
+        preConfirm: (nuevoEmail) => {
+            Swal.showLoading();
+
+            return $.ajax({
+                url: '/usuarios/' + userId + '/reenviar-correo',
+                method: 'POST',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content'),
+                    email: nuevoEmail
+                }
+            }).then(function (response) {
+                return { ...response, email: nuevoEmail };
+            }).catch(function (xhr) {
+    Swal.hideLoading();
+
+    let mensaje = 'No se pudo reenviar el correo.';
+    if (xhr.responseJSON && xhr.responseJSON.message) {
+        mensaje = xhr.responseJSON.message;
+    }
+
+    Swal.showValidationMessage(mensaje);
+});
+
+        }
+    }).then((result) => {
+        if (result.isConfirmed && result.value) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Correo reenviado',
+                html: `
+                    <p><strong>Correo enviado a:</strong><br>${result.value.email}</p>
+                    <p>${result.value.message}</p>
+                `,
+                confirmButtonText: 'Aceptar'
+            });
+        }
+    });
+});
+
 </script>
 @stop

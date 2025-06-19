@@ -18,16 +18,6 @@ class ClienteController extends Controller
 {
     public function index()
     {
-        /* $userId = Auth::id();
-        $establecimientoId = session('establecimiento_id');
-        $submenuId = session('submenu_id'); // debe estar en sesión tras el clic en sidebar
-
-        $permisos = DB::table('submenu_establecimiento_usuario')
-            ->where('user_id', $userId)
-            ->where('establecimiento_id', $establecimientoId)
-            ->where('submenu_id', $submenuId)
-            ->first(); */
-
         return view('empresa.clientes.index'); //, compact('permisos')
     }
 

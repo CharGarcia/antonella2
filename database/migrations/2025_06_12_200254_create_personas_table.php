@@ -22,8 +22,6 @@ class CreatePersonasTable extends Migration
             $table->json('tipo'); // puede ser ["cliente", "proveedor", "empleado"]
             $table->string('tipo_empresa')->nullable(); // natural, juridica
             $table->string('nombre_comercial')->nullable();
-            $table->integer('plazo_credito')->nullable(); // en días
-            $table->boolean('parte_relacionada')->default(false);
             $table->foreignId('id_banco')->nullable()->constrained('bancos')->onDelete('set null');
             $table->string('tipo_cuenta', 50)->nullable(); // ahorros, corriente
             $table->string('numero_cuenta')->nullable();

@@ -1,4 +1,5 @@
 <!-- resources/views/partials/modal_cliente.blade.php -->
+<!-- Modal -->
 <div class="modal fade" id="modal-cliente" tabindex="-1" data-backdrop="static" role="dialog" aria-labelledby="modalClienteLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <form id="form-cliente">
@@ -6,66 +7,63 @@
             <input type="hidden" name="cliente_id" id="cliente_id">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalClienteLabel">Nuevo Cliente</h5>
+                    <h5 class="modal-title" id="modalClienteLabel">Gestión de Cliente</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body row">
-                    <div class="form-group col-md-4">
-                        <label>Tipo de Identificación</label>
-                        <select name="tipo_identificacion" id="tipo_identificacion" class="form-control">
-                            <option value="04">RUC</option>
-                            <option value="05">Cédula</option>
-                            <option value="06">Pasaporte</option>
-                            <option value="07">Consumidor final</option>
-                            <option value="08">Identificación del exterior</option>
-                        </select>
-                    </div>
-                    <div class="form-group col-md-4">
-                        <label>Número Identificación</label>
-                        <input type="text" name="numero_identificacion" id="numero_identificacion" class="form-control">
-                    </div>
-                    <div class="form-group col-md-4">
-                        <label>Estado</label>
-                        <select name="estado" id="estado" class="form-control">
-                            <option value="1">Activo</option>
-                            <option value="0">Inactivo</option>
-                        </select>
-                    </div>
-                    <div class="form-group col-md-12">
-                        <label>Razón social / Nombre</label>
-                        <input type="text" name="nombre" id="nombre" class="form-control" required>
-                    </div>
-                    <div class="form-group col-md-3">
-                        <label>Teléfono</label>
-                        <input type="text" name="telefono" id="telefono" class="form-control" maxlength="10">
-                    </div>
-                    <div class="form-group col-md-9">
-                        <label>Email(s)</label>
-                        <input type="text" name="email" id="email" class="form-control" placeholder="Separar múltiples emails con coma">
-                    </div>
-                    <div class="form-group col-md-12">
-                        <label>Dirección</label>
-                        <input type="text" name="direccion" id="direccion" class="form-control">
-                    </div>
-                    <div class="form-group col-md-8">
-                        <label>Vendedor</label>
-                        <select name="id_vendedor" id="id_vendedor" class="form-control"></select>
-                    </div>
-                    <div class="form-group col-md-4">
-                        <label>Plazo crédito (días)</label>
-                        <input type="number" name="plazo_credito" id="plazo_credito" class="form-control" value="0">
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label>Provincia</label>
-                        <input type="text" name="provincia" id="provincia" class="form-control">
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label>Ciudad</label>
-                        <input type="text" name="ciudad" id="ciudad" class="form-control">
+
+                <div class="modal-body">
+                    <!-- Pestañas con íconos -->
+                    <ul class="nav nav-tabs mb-3" id="clienteTabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-toggle="tab" href="#tab-general">
+                                <i class="fas fa-user me-1"></i> General
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#tab-financieros">
+                                <i class="fas fa-dollar-sign me-1"></i> Financiero
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#tab-tributarios">
+                                <i class="fas fa-file-invoice me-1"></i> Tributario
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#tab-comercial">
+                                <i class="fas fa-briefcase me-1"></i> Comercial
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#tab-documentos">
+                                <i class="fas fa-folder-open me-1"></i> Documentos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#tab-kpi">
+                                <i class="fas fa-chart-line me-1"></i> KPIs
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#tab-configuracion">
+                                <i class="fas fa-cogs me-1"></i> Configuración
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        @include('empresa.clientes.tabs.general')
+                        @include('empresa.clientes.tabs.financieros')
+                        @include('empresa.clientes.tabs.tributarios')
+                        @include('empresa.clientes.tabs.comercial')
+                        @include('empresa.clientes.tabs.documentos')
+                        @include('empresa.clientes.tabs.kpi')
+                        @include('empresa.clientes.tabs.configuracion')
                     </div>
                 </div>
+
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">Guardar</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
@@ -74,6 +72,7 @@
         </form>
     </div>
 </div>
+
 
 @push('js')
 <script>
@@ -100,7 +99,7 @@ $('#numero_identificacion').on('change', function () {
             if (data.encontrado) {
                 const p = data.persona;
                 $('#nombre').val(p.nombre ?? '');
-                $('#estado').val(p.estado ? '1' : '0');
+                $('#estado').val(p.estado_tipo?.cliente ?? 'activo');
                 $('#provincia').val(p.provincia ?? '');
                 $('#ciudad').val(p.ciudad ?? '');
                 $('#direccion').val(p.direccion ?? '');
@@ -126,7 +125,7 @@ $('#numero_identificacion').on('change', function () {
                             const establecimientos = response.data?.establecimientos ?? [];
                             if (contribuyente) {
                                 $('#nombre').val(contribuyente.razonSocial ?? '');
-                                $('#estado').val(contribuyente.estadoContribuyenteRuc === 'ACTIVO' ? '1' : '0');
+                                $('#estado').val(contribuyente.estadoContribuyenteRuc === 'ACTIVO' ? 'activo' : 'inactivo');
                             }
                             const matriz = establecimientos.find(est => est.matriz === 'SI');
                             if (matriz?.direccionCompleta) {
@@ -218,7 +217,8 @@ $(document).on('click', '.editar-cliente', function () {
         $('#plazo_credito').val(res.plazo_credito);
         $('#provincia').val(res.provincia);
         $('#ciudad').val(res.ciudad);
-        $('#estado').val(res.estado ? 1 : 0);
+        const estadoCliente = res.estado_tipo?.cliente ?? 'activo';
+        $('#estado').val(estadoCliente);
         $('#modalClienteLabel').html('<i class="fas fa-edit text-warning mr-2"></i> Editar Cliente');
         $('#modal-cliente').modal('show');
     }).fail(function () {

@@ -33,7 +33,6 @@
                             <th>Teléfono</th>
                             <th>Email(s)</th>
                             <th>Dirección</th>
-                            <th>Vendedor</th>
                             <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
@@ -43,12 +42,11 @@
                             <th><input type="text" class="form-control form-control-sm" placeholder="Teléfono"></th>
                             <th><input type="text" class="form-control form-control-sm" placeholder="Email"></th>
                             <th><input type="text" class="form-control form-control-sm" placeholder="Dirección"></th>
-                            <th><input type="text" class="form-control form-control-sm" placeholder="Vendedor"></th>
                             <th>
                                 <select class="form-control form-control-sm">
                                     <option value="">Todos</option>
-                                    <option value="1">Activo</option>
-                                    <option value="0">Inactivo</option>
+                                    <option value="activo">Activo</option>
+                                    <option value="inactivo">Inactivo</option>
                                 </select>
                             </th>
                             <th></th>
@@ -88,8 +86,7 @@ $(function () {
             { data: 'telefono' },
             { data: 'email' },
             { data: 'direccion' },
-           { data: 'vendedor_nombre', defaultContent: '-' },
-            { data: 'estado'},
+            { data: 'estado_tipo'},
             { data: 'acciones', orderable: false, searchable: false }
         ],
         language: {
@@ -117,7 +114,6 @@ $(function () {
     });
 
 });
-
 
 </script>
 @stop

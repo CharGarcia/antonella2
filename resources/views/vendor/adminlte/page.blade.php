@@ -4,12 +4,13 @@
 @inject('preloaderHelper', 'JeroenNoten\LaravelAdminLte\Helpers\PreloaderHelper')
 
 @section('adminlte_css')
+    @vite(['resources/css/app.css'])
     @livewireStyles
     @stack('css')
     @yield('css')
 @stop
 
-@section('classes_body', $layoutHelper->makeBodyClasses())
+@section('classes_body', $layoutHelper->makeBodyClasses() . ' compact-ui')
 
 @section('body_data', $layoutHelper->makeBodyData())
 

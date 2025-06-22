@@ -23,10 +23,8 @@ class ClienteController extends Controller
 
     public function getData(Request $request)
     {
-
         $user = Auth::user();
         $establecimientoId = session('establecimiento_id');
-        // Obtener permisos del usuario para esta ruta
         $submenuId = session('submenu_id');
 
         $permisos = \App\Models\SubmenuEstablecimientoUsuario::where('user_id', $user->id)
@@ -34,10 +32,7 @@ class ClienteController extends Controller
             ->where('submenu_id', $submenuId)
             ->first();
 
-
-        // Query principal
-        $cliente = Persona::with('vendedor')
-            ->where('id_establecimiento', $establecimientoId)
+        $cliente = Persona::where('id_establecimiento', $establecimientoId)
             ->whereJsonContains('tipo', ['cliente']);
 
         return DataTables::eloquent($cliente)
@@ -62,13 +57,10 @@ class ClienteController extends Controller
                                 $cliente->where('direccion', 'like', "%$searchValue%");
                                 break;
                             case 5:
-                                $cliente->whereHas('vendedor', function ($q) use ($searchValue) {
-                                    $q->where('nombre', 'like', "%$searchValue%");
-                                });
-                                break;
-                            case 6:
-                                $estado = $searchValue == '1';
-                                $cliente->where('estado', $estado);
+                                $estado = strtolower($searchValue);
+                                if (in_array($estado, ['activo', 'inactivo'])) {
+                                    $cliente->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(estado_tipo, '$.cliente')) = ?", [$estado]);
+                                }
                                 break;
                         }
                     }
@@ -79,33 +71,28 @@ class ClienteController extends Controller
 
                 if (\App\Helpers\PermisosHelper::puedeRealizarAccion('modificar', $permisos)) {
                     $botones .= '<button class="btn btn-warning btn-sm editar-cliente" data-id="' . $cliente->id . '" title="Editar">
-            <i class="fas fa-edit"></i>
-        </button>';
+                    <i class="fas fa-edit"></i>
+                </button>';
                 }
 
                 if (\App\Helpers\PermisosHelper::puedeRealizarAccion('eliminar', $permisos)) {
                     $botones .= '<button class="btn btn-danger btn-sm eliminar-cliente" data-id="' . $cliente->id . '" title="Eliminar">
-            <i class="fas fa-trash-alt"></i>
-        </button>';
+                    <i class="fas fa-trash-alt"></i>
+                </button>';
                 }
 
                 $botones .= '</div>';
-
                 return $botones;
             })
-
-            ->addColumn('vendedor_nombre', function ($cliente) {
-                return optional($cliente->vendedor)->nombre ?? '-';
-            })
-            ->editColumn('estado', function ($cliente) {
-                return $cliente->estado == 1
+            ->editColumn('estado_tipo', function ($cliente) {
+                $estado = $cliente->estado_tipo['cliente'] ?? 'activo';
+                return $estado === 'activo'
                     ? '<span class="badge badge-success"><i class="fas fa-check-circle"></i> Activo</span>'
                     : '<span class="badge badge-danger"><i class="fas fa-times-circle"></i> Inactivo</span>';
             })
-            ->rawColumns(['acciones', 'estado'])
+            ->rawColumns(['acciones', 'estado_tipo'])
             ->make(true);
     }
-
 
 
     public function store(Request $request)
@@ -124,7 +111,7 @@ class ClienteController extends Controller
             'ciudad.max' => 'La ciudad no puede superar los 50 caracteres.',
             'plazo_credito.integer' => 'El plazo de crédito debe ser un número entero.',
             'estado.required' => 'El estado es obligatorio.',
-            'estado.boolean' => 'El estado debe ser activo o inactivo.'
+            'estado.in' => 'El estado debe ser "activo" o "inactivo".'
         ];
 
         $data = $request->validate([
@@ -156,10 +143,9 @@ class ClienteController extends Controller
             'plazo_credito' => 'nullable|integer|min:0',
             'provincia' => 'nullable|string|max:50',
             'ciudad' => 'nullable|string|max:50',
-            'estado' => 'required|boolean',
+            'estado' => 'required|in:activo,inactivo',
         ], $messages);
 
-        // Validación condicional para tipo_identificación
         if ($data['tipo_identificacion'] === '04' && strlen($data['numero_identificacion']) !== 13) {
             return response()->json([
                 'errors' => [
@@ -176,14 +162,13 @@ class ClienteController extends Controller
             ], 422);
         }
 
-        // Limpiar y convertir a mayúsculas los campos de texto
         $camposTexto = ['nombre', 'direccion', 'provincia', 'ciudad'];
         foreach ($camposTexto as $campo) {
             if (!empty($data[$campo])) {
                 $data[$campo] = strtoupper(preg_replace('/\s+/', ' ', trim($data[$campo])));
             }
         }
-        // Normalizar correos
+
         $data['email'] = implode(',', array_map('strtolower', array_map('trim', explode(',', $data['email']))));
 
         $persona = Persona::where('numero_identificacion', $data['numero_identificacion'])->first();
@@ -194,24 +179,34 @@ class ClienteController extends Controller
 
         if ($persona) {
             $tipos = $persona->tipo ?? [];
+            $estadoTipo = $persona->estado_tipo ?? [];
+
             if (!in_array('cliente', $tipos)) {
                 $tipos[] = 'cliente';
             }
-            $persona->update(array_merge($data, ['tipo' => $tipos]));
+            $estadoTipo['cliente'] = $data['estado'];
+
+            $persona->update(array_merge($data, [
+                'tipo' => $tipos,
+                'estado_tipo' => $estadoTipo,
+            ]));
         } else {
             $data['id_user'] = Auth::id();
             $data['id_establecimiento'] = session('establecimiento_id');
             $data['tipo'] = ['cliente'];
+            $data['estado_tipo'] = ['cliente' => $data['estado']];
+            unset($data['estado']);
+
             Persona::create($data);
         }
 
         return response()->json(['message' => 'Cliente creado']);
     }
 
-
     public function update(Request $request, $id)
     {
         $cliente = Persona::findOrFail($id);
+
         $messages = [
             'tipo_identificacion.required' => 'El tipo de identificación es obligatorio.',
             'numero_identificacion.required' => 'El número de identificación es obligatorio.',
@@ -221,12 +216,12 @@ class ClienteController extends Controller
             'email.required' => 'El campo email es obligatorio.',
             'email.string' => 'El campo email debe ser una cadena de texto.',
             'direccion.max' => 'La dirección no puede superar los 255 caracteres.',
-            'telefono.max' => 'El teléfono no puede superar los 10 caracteres.',
+            'telefono.max' => 'El teléfono no puede superar los 20 caracteres.',
             'provincia.max' => 'La provincia no puede superar los 50 caracteres.',
             'ciudad.max' => 'La ciudad no puede superar los 50 caracteres.',
             'plazo_credito.integer' => 'El plazo de crédito debe ser un número entero.',
             'estado.required' => 'El estado es obligatorio.',
-            'estado.boolean' => 'El estado debe ser activo o inactivo.'
+            'estado.in' => 'El estado debe ser "activo" o "inactivo".'
         ];
 
         $data = $request->validate([
@@ -258,10 +253,9 @@ class ClienteController extends Controller
             'plazo_credito' => 'nullable|integer|min:0',
             'provincia' => 'nullable|string|max:50',
             'ciudad' => 'nullable|string|max:50',
-            'estado' => 'required|boolean',
+            'estado' => 'required|in:activo,inactivo',
         ], $messages);
 
-        // Validación condicional para tipo_identificación
         if ($data['tipo_identificacion'] === '04' && strlen($data['numero_identificacion']) !== 13) {
             return response()->json([
                 'errors' => [
@@ -278,7 +272,6 @@ class ClienteController extends Controller
             ], 422);
         }
 
-        // Limpiar y convertir a mayúsculas los campos de texto
         $camposTexto = ['nombre', 'direccion', 'provincia', 'ciudad'];
         foreach ($camposTexto as $campo) {
             if (!empty($data[$campo])) {
@@ -286,19 +279,30 @@ class ClienteController extends Controller
             }
         }
 
-        // Normalizar correos
         $data['email'] = implode(',', array_map('strtolower', array_map('trim', explode(',', $data['email']))));
 
         $tipos = $cliente->tipo ?? [];
         if (!in_array('cliente', $tipos)) {
             $tipos[] = 'cliente';
         }
-        $data['tipo'] = $tipos;
 
-        $cliente->update($data);
+        $cliente->tipo = $tipos;
+
+        // Actualizar solo el estado del tipo "cliente"
+        $estadoTipo = $cliente->estado_tipo ?? [];
+        $estadoTipo['cliente'] = $data['estado'];
+        $cliente->estado_tipo = $estadoTipo;
+
+        // Eliminar el campo 'estado' para evitar conflictos
+        unset($data['estado']);
+
+        // Actualizar otros campos
+        $cliente->fill($data);
+        $cliente->save();
 
         return response()->json(['message' => 'Cliente actualizado']);
     }
+
 
 
     //para que me cargue los datos para editar

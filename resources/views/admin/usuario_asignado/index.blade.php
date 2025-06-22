@@ -25,7 +25,7 @@
           <th>Cédula</th>
           <th>Usuario</th>
           <th>Email</th>
-          <th>Administrado por</th>
+          <th>Asignado a</th>
           <th>Acción</th>
         </tr>
             <tr id="fila-filtros" class="filters" style="visibility: visible;">
@@ -43,49 +43,46 @@
 
 {{-- Modal de asignación --}}
 <div class="modal fade" id="modal-usuario-asignado" data-backdrop="static" tabindex="-1" role="dialog">
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog modal-md" role="document">
     <form id="form-usuario-asignado">
       @csrf
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title"id="modalUsuarioAsignadoLabel" >Asignar un usuario</h5>
+          <h5 class="modal-title" id="modalUsuarioAsignadoLabel">Asignar Usuario a Administrador</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
-                  <span aria-hidden="true">&times;</span>
-                </button>
+            <span>&times;</span>
+          </button>
         </div>
+
         <div class="modal-body row">
-          <div class="form-group col-md-12">
-            <label for="user_id">Usuario</label>
-            <select name="user_id" id="user_id" class="form-control" required>
+          <div class="form-group col-md-12 mb-2">
+            <label for="user_asignado_id">Usuario</label>
+            <select name="user_id" id="user_asignado_id" class="form-control" required>
               <option value="">-- Selecciona --</option>
               @foreach(\App\Models\User::where('status', true)
-                ->whereHas('roles', function ($q) {
-                    $q->where('name', 'user');
-                })
-                ->orderBy('name')
-                ->get() as $user)
+                ->whereHas('roles', fn($q) => $q->where('name', 'user'))
+                ->orderBy('name')->get() as $user)
                 <option value="{{ $user->id }}">{{ $user->name }} - {{ $user->email }}</option>
-            @endforeach
+              @endforeach
             </select>
           </div>
-          <div class="form-group col-md-12">
-            <label for="admin_id">Asignar a</label>
-            <select name="admin_id" id="admin_id" class="form-control" required>
+
+          <div class="form-group col-md-12 mb-2">
+            <label for="admin_asignado_id">Asignar a</label>
+            <select name="admin_id" id="admin_asignado_id" class="form-control" required>
               <option value="">-- Selecciona --</option>
-               @foreach(\App\Models\User::where('status', true)
-                ->whereHas('roles', function ($q) {
-                    $q->where('name', 'admin');
-                })
-                ->orderBy('name')
-                ->get() as $user)
+              @foreach(\App\Models\User::where('status', true)
+                ->whereHas('roles', fn($q) => $q->where('name', 'admin'))
+                ->orderBy('name')->get() as $user)
                 <option value="{{ $user->id }}">{{ $user->name }} - {{ $user->email }}</option>
-            @endforeach
+              @endforeach
             </select>
           </div>
         </div>
+
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
           <button type="submit" class="btn btn-primary">Guardar</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
         </div>
       </div>
     </form>
@@ -141,23 +138,27 @@ $(function(){
   // Mostrar modal
   $('#btn-nuevo-asignar-usuario').on('click', function () {
         $('#form-usuario-asignado')[0].reset();
-        $('#modalUsuarioAsignadoLabel').html('<i class="fas fa-clipboard-check text-success mr-2"></i> Administrar un usuario');
+        $('#modalUsuarioAsignadoLabel').html('<i class="fas fa-clipboard-check text-success mr-2"></i> Asignar a un usuario un administrador');
         $('#modal-usuario-asignado').modal('show');
     });
 
         // Inicializar Select2
- $('#user_id').select2({
-    theme: 'bootstrap4',
-    dropdownParent: $('#modalUsuarioAsignadoLabel'),
-    width: '100%',
-    placeholder: 'Seleccione un usuario'
-});
+$(document).ready(function () {
+    $('#user_asignado_id').select2({
+        theme: 'bootstrap4',
+        dropdownParent: $('#modal-usuario-asignado'),
+        width: '100%',
+        placeholder: 'Seleccione un usuario',
+        allowClear: true
+    });
 
-$('#admin_id').select2({
-    theme: 'bootstrap4',
-    dropdownParent: $('#modalUsuarioAsignadoLabel'),
-    width: '100%',
-    placeholder: 'Seleccione un administrador'
+    $('#admin_asignado_id').select2({
+        theme: 'bootstrap4',
+        dropdownParent: $('#modal-usuario-asignado'),
+        width: '100%',
+        placeholder: 'Seleccione un administrador',
+        allowClear: true
+    });
 });
 
       // Guardar asignación

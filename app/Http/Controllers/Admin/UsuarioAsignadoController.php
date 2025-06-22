@@ -69,18 +69,55 @@ class UsuarioAsignadoController extends Controller
         ]);
     }
 
-
-
     public function destroy($id)
     {
+        /* -----------------------------------------------------------
+     * 1) Traemos la fila que se va a eliminar de usuario_asignado
+     * ----------------------------------------------------------- */
         $relacion = DB::table('usuario_asignado')->where('id', $id)->first();
 
         if (!$relacion) {
             return response()->json(['message' => 'Asignación no encontrada.'], 404);
         }
 
-        DB::table('usuario_asignado')->where('id', $id)->delete();
+        //  Guardamos los datos antes de borrar nada
+        $usuarioId = $relacion->id_user;   // usuario “empleado” que quitamos
+        $adminId   = $relacion->id_admin;  // admin que lo tiene asignado
 
-        return response()->json(['message' => 'Asignación eliminada correctamente.']);
+        /* -----------------------------------------------------------
+     * 2) Ejecutamos todo en una transacción para asegurar atomicidad
+     * ----------------------------------------------------------- */
+        DB::transaction(function () use ($id, $usuarioId, $adminId) {
+
+            /* 2.1) Eliminamos la relación usuario-admin seleccionada      */
+            DB::table('usuario_asignado')
+                ->where('id', $id)
+                ->delete();
+
+            /* 2.2) Averiguamos qué establecimientos controla ese admin    */
+            $establecimientosAdmin = DB::table('submenu_establecimiento_usuario')
+                ->where('user_id', $adminId)          // registros del ADMIN
+                ->pluck('establecimiento_id')         // solo los IDs
+                ->unique()                            // quitamos duplicados
+                ->toArray();
+
+            /* 2.3) Quitamos al usuario de esos mismos establecimientos    */
+            if (!empty($establecimientosAdmin)) {
+                DB::table('submenu_establecimiento_usuario')
+                    ->where('user_id', $usuarioId)                    // registros del USUARIO
+                    ->whereIn('establecimiento_id', $establecimientosAdmin)
+                    ->delete();
+
+                // 2.4 Eliminar también las filas en establecimiento_usuario
+                DB::table('establecimiento_usuario')
+                    ->where('user_id', $usuarioId)
+                    ->whereIn('establecimiento_id', $establecimientosAdmin)
+                    ->delete();
+            }
+            // Si el admin no tenía registros en submenu_establecimiento_usuario,
+            // no se elimina nada más (permanece lo de otros admins).
+        });
+
+        return response()->json(['message' => 'Asignación y permisos eliminados correctamente.']);
     }
 }

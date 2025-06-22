@@ -36,7 +36,7 @@
                         <tbody>
                             @foreach($items as $modulo)
                                 @php
-                                    $permiso = $permisos[$modulo->submenu_id] ?? null;
+                                    $permiso = $permisosAsignados[$modulo->submenu_id] ?? null;
                                 @endphp
                                 <tr>
                                     <td>

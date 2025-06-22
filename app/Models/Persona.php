@@ -20,25 +20,18 @@ class Persona extends Model
         'telefono',
         'email',
         'direccion',
-        'id_vendedor',
         'tipo',
         'tipo_empresa',
         'nombre_comercial',
-        'id_banco',
-        'tipo_cuenta',
-        'numero_cuenta',
-        'genero',
         'provincia',
         'ciudad',
-        'fecha_nacimiento',
-        'estado',
+        'pais',
+        'estado_tipo',
     ];
 
     protected $casts = [
         'tipo' => 'array',
-        'parte_relacionada' => 'boolean',
-        'estado' => 'boolean',
-        'fecha_nacimiento' => 'date',
+        'estado_tipo' => 'array',
     ];
 
     // Relaciones
@@ -50,16 +43,6 @@ class Persona extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user');
-    }
-
-    public function vendedor()
-    {
-        return $this->belongsTo(User::class, 'id_vendedor');
-    }
-
-    public function banco()
-    {
-        return $this->belongsTo(Banco::class, 'id_banco');
     }
 
     // Scope para clientes

@@ -191,7 +191,7 @@ class AsignacionEstablecimientoUsuarioAdminController extends Controller
             ->groupBy('menu_nombre');
 
         // Permisos ya asignados al usuario destino
-        $permisos = DB::table('submenu_establecimiento_usuario')
+        $permisosAsignados = DB::table('submenu_establecimiento_usuario')
             ->where('user_id', $request->user_id)
             ->where('establecimiento_id', $request->establecimiento_id)
             ->get()
@@ -199,7 +199,7 @@ class AsignacionEstablecimientoUsuarioAdminController extends Controller
 
         return view('admin.asignacion_establecimiento_usuario_admin.partials.tabla_permisos', [
             'submenus' => $submenus,
-            'permisos' => $permisos
+            'permisosAsignados' => $permisosAsignados
         ]);
     }
 

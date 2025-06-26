@@ -1,7 +1,21 @@
-@props(['nombre', 'label', 'required' => null])
+@props([
+    'nombre',
+    'label',
+    'value' => null,
+    'required' => false,
+    'disabled' => false,
+    'col' => 'col-md-12'
+])
 
-<div class="form-group col-md-4">
-    <label for="{{ $nombre }}">{{ $label }}</label>
-    <input type="date" name="{{ $nombre }}" id="{{ $nombre }}"
-           class="form-control" value="{{ old($nombre) }}" {{ $required }}>
+<div class="{{ $col }}">
+    <label for="{{ $nombre }}" class="form-label">{{ $label }}</label>
+    <input
+        type="date"
+        name="{{ $nombre }}"
+        id="{{ $nombre }}"
+        value="{{ old($nombre, $value) }}"
+        @if($required) required @endif
+        @if($disabled) disabled @endif
+        {{ $attributes->merge(['class' => 'form-control']) }}
+    >
 </div>

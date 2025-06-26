@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('datos_tributarios_clientes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('datos_cliente_id')->constrained('datos_clientes')->onDelete('cascade');
-            $table->boolean('agente_retencion')->default(false);
-            $table->boolean('contribuyente_especial')->default(false);
-            $table->boolean('obligado_contabilidad')->default(false);
+            $table->boolean('agente_retencion')->nullable();
+            $table->boolean('contribuyente_especial')->nullable();
+            $table->boolean('obligado_contabilidad')->nullable();
             $table->string('regimen_tributario')->nullable();
             $table->string('retencion_fuente')->nullable();
             $table->string('retencion_iva')->nullable();

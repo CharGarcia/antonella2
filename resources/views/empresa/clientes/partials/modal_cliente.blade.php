@@ -1,5 +1,6 @@
 <!-- resources/views/partials/modal_cliente.blade.php -->
 <!-- Modal -->
+
 <div class="modal fade" id="modal-cliente" tabindex="-1" data-backdrop="static" role="dialog" aria-labelledby="modalClienteLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <form id="form-cliente">
@@ -76,95 +77,137 @@
 
 @push('js')
 <script>
-$(document).ready(function () {
+    $(document).ready(function () {
     $('#telefono').inputmask('0999999999');
 
+    // Al cerrar el modal, limpiar todos los campos del formulario
+    $('#modal-cliente').on('hidden.bs.modal', function () {
+        const form = $(this).find('form')[0];
+        form.reset();
+        $(form).find('input[type=hidden]').not('[name="_token"]').val('');
+        $(form).find('input[type=checkbox]').prop('checked', false);
+        $(form).find('select').val('').trigger('change');
+    });
+
+    // Al mostrar el modal, activar la pestaña General
+    $('#modal-cliente').on('show.bs.modal', function () {
+        $(this).find('.nav-tabs a[href="#tab-general"]').tab('show');
+    });
+
+    // Abrir modal nuevo cliente
     $('#btn-nuevo-cliente').on('click', function () {
-        $('#form-cliente')[0].reset();
+        const form = $('#form-cliente')[0];
+        form.reset();
+
+        $('#form-cliente').find('input[type=hidden]').not('[name="_token"]').val('');
+        $('#form-cliente').find('input[type=checkbox]').prop('checked', false);
+
+        // Solo limpia select2 si usas alguno
+        $('#form-cliente').find('select.select2').val('').trigger('change');
+
         $('#cliente_id').val('');
         $('#modalClienteLabel').html('<i class="fas fa-clipboard-check text-success mr-2"></i> Nuevo Cliente');
         $('#modal-cliente').modal('show');
     });
 
-$('#numero_identificacion').on('change', function () {
-    const numero_identificacion = $(this).val();
-    const tipo_identificacion = $('#tipo_identificacion').val();
+    // Autocompletado por identificación
+    $('#numero_identificacion').on('change', function () {
+        const numero_identificacion = $(this).val();
+        const tipo_identificacion = $('#tipo_identificacion').val();
+        $('#codigo_interno').val(numero_identificacion);
 
-    const esCedulaValida = tipo_identificacion === '05' && numero_identificacion.length === 10;
-    const esRucValido = tipo_identificacion === '04' && numero_identificacion.length === 13;
+        const esCedulaValida = tipo_identificacion === '05' && numero_identificacion.length === 10;
+        const esRucValido = tipo_identificacion === '04' && numero_identificacion.length === 13;
 
-    if (esCedulaValida || esRucValido) {
-        // 🔍 Buscar en la base de datos local primero
-        $.get('{{ route("clientes.buscarPorIdentificacion") }}', { numero_identificacion }, function (data) {
-            if (data.encontrado) {
-                const p = data.persona;
-                $('#nombre').val(p.nombre ?? '');
-                $('#estado').val(p.estado_tipo?.cliente ?? 'activo');
-                $('#provincia').val(p.provincia ?? '');
-                $('#ciudad').val(p.ciudad ?? '');
-                $('#direccion').val(p.direccion ?? '');
-                $('#email').val(p.email ?? '');
-            } else {
-                // No encontrado localmente, consultar API externa
-                Swal.fire({
-                    title: 'Consultando desde SRI...',
-                    allowOutsideClick: false,
-                    didOpen: () => Swal.showLoading()
-                });
+        if (esCedulaValida || esRucValido) {
+            $.get('{{ route("clientes.buscarPorIdentificacion") }}', { numero_identificacion }, function (data) {
+                if (data.encontrado) {
+                    const p = data.persona;
+                    $('#nombre').val(p.nombre ?? '');
+                    $('#estado').val(p.datos_cliente?.estado ?? 'activo');
+                    $('#pais').val(p.pais ?? '');
+                    $('#provincia').val(p.provincia ?? '');
+                    $('#ciudad').val(p.ciudad ?? '');
+                    $('#zona').val(p.zona ?? '');
+                    $('#direccion').val(p.direccion ?? '');
+                    $('#email').val(p.email ?? '');
+                } else {
+                    Swal.fire({
+                        title: 'Consultando SRI...',
+                        allowOutsideClick: false,
+                        didOpen: () => Swal.showLoading()
+                    });
 
-                $.ajax({
-                    url: 'http://137.184.159.242:4000/api/sri-identification',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    dataType: 'json',
-                    data: JSON.stringify({ identification: numero_identificacion }),
-                    success: function (response) {
-                        Swal.close();
-                        if (esRucValido) {
-                            const contribuyente = response.data?.datosContribuyente?.[0];
-                            const establecimientos = response.data?.establecimientos ?? [];
-                            if (contribuyente) {
-                                $('#nombre').val(contribuyente.razonSocial ?? '');
-                                $('#estado').val(contribuyente.estadoContribuyenteRuc === 'ACTIVO' ? 'activo' : 'inactivo');
+                    $.ajax({
+                        url: 'http://137.184.159.242:4000/api/sri-identification',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        dataType: 'json',
+                        data: JSON.stringify({ identification: numero_identificacion }),
+                        success: function (response) {
+                            Swal.close();
+                            if (esRucValido) {
+                                const c = response.data?.datosContribuyente?.[0];
+                                const establecimientos = response.data?.establecimientos ?? [];
+                                if (c) {
+                                    $('#nombre').val(c.razonSocial ?? '');
+                                    $('#estado').val(c.estadoContribuyenteRuc === 'ACTIVO' ? 'activo' : 'inactivo');
+                                    $('#agente_retencion').prop('checked', (c.agenteRetencion || '').toUpperCase() === 'SI');
+                                    $('#contribuyente_especial').prop('checked', (c.contribuyenteEspecial || '').toUpperCase() === 'SI');
+                                    $('#obligado_contabilidad').prop('checked', (c.obligadoLlevarContabilidad || '').toUpperCase() === 'SI');
+
+                                    const regimenMap = {
+                                        'GENERAL': '1',
+                                        'RIMPE EMPRENDEDOR': '2',
+                                        'RIMPE NEGOCIO POPULAR': '3'
+                                    };
+
+                                    $('#regimen_tributario').val(regimenMap[(c.regimen || '').toUpperCase()] || '');
+                                }
+
+                                const matriz = establecimientos.find(est => est.matriz === 'SI');
+                                if (matriz?.direccionCompleta) {
+                                    const partes = matriz.direccionCompleta.split(' / ');
+                                    $('#provincia').val(partes[0] ?? '');
+                                    $('#ciudad').val(partes[1] ?? '');
+                                    $('#zona').val(partes[2] ?? '');
+                                    $('#direccion').val(partes[3] ?? '');
+                                }
                             }
-                            const matriz = establecimientos.find(est => est.matriz === 'SI');
-                            if (matriz?.direccionCompleta) {
-                                const partes = matriz.direccionCompleta.split(' / ');
-                                $('#provincia').val(partes[0] ?? '');
-                                $('#ciudad').val(partes[1] ?? '');
-                                $('#direccion').val(partes[3] ?? '');
+
+                            if (esCedulaValida) {
+                                const c = response.data;
+                                $('#nombre').val(c.nombreCompleto ?? '');
                             }
+                        },
+                        error: function () {
+                            Swal.close();
+                            Swal.fire('Error', 'No se pudo obtener información del SRI', 'error');
                         }
+                    });
+                }
+            });
+        }
+    });
 
-                        if (esCedulaValida) {
-                            const contribuyente = response.data;
-                            $('#nombre').val(contribuyente.nombreCompleto ?? '');
-                        }
-                    },
-                    error: function () {
-                        Swal.close();
-                        Swal.fire('Error', 'No se pudo obtener información del SRI', 'error');
-                    }
-                });
-            }
-        });
-    }
-});
-
-});
-
-
-// Guardar o editar
+    // Guardar o editar cliente
 $('#form-cliente').on('submit', function (e) {
     e.preventDefault();
     const id = $('#cliente_id').val();
     const url = id ? `/empresa/clientes/${id}` : '{{ route("clientes.store") }}';
-    const method = id ? 'PUT' : 'POST';
+    const method = id ? 'POST' : 'POST'; // Laravel no acepta PUT con FormData directamente
+
+    const formData = new FormData(this);
+    if (id) {
+        formData.append('_method', 'PUT'); // Spoofing method for Laravel
+    }
 
     $.ajax({
         url: url,
         method: method,
-        data: $(this).serialize(),
+        data: formData,
+        contentType: false,
+        processData: false,
         success: function (response) {
             $('#modal-cliente').modal('hide');
             Swal.fire({
@@ -202,23 +245,87 @@ $('#form-cliente').on('submit', function (e) {
     });
 });
 
+
+    // Cargar cliente en edición
 $(document).on('click', '.editar-cliente', function () {
     const id = $(this).data('id');
-    const url = '{{ route("clientes.edit", ":id") }}'.replace(':id', id);
+    const url = `/empresa/clientes/${id}/edit`;
+
     $.get(url, function (res) {
+        const datos = res.datos_cliente ?? {};
+
         $('#cliente_id').val(res.id);
-        $('#tipo_identificacion').val(res.tipo_identificacion);
+        $('#tipo_identificacion').val(res.tipo_identificacion).trigger('change');
         $('#numero_identificacion').val(res.numero_identificacion);
         $('#nombre').val(res.nombre);
         $('#telefono').val(res.telefono);
         $('#email').val(res.email);
         $('#direccion').val(res.direccion);
-        $('#id_vendedor').val(res.id_vendedor).trigger('change');
-        $('#plazo_credito').val(res.plazo_credito);
         $('#provincia').val(res.provincia);
         $('#ciudad').val(res.ciudad);
-        const estadoCliente = res.estado_tipo?.cliente ?? 'activo';
-        $('#estado').val(estadoCliente);
+        $('#pais').val(res.pais);
+        $('#estado').val(datos.estado ?? 'activo');
+
+        // Datos cliente
+        $('#codigo_interno').val(datos.codigo_interno ?? '');
+        $('#categoria_cliente').val(datos.categoria_cliente ?? '');
+        $('#segmento').val(datos.segmento ?? '');
+        $('#fecha_registro').val(datos.fecha_registro ?? '');
+        $('#vendedor_asignado').val(datos.vendedor_asignado ?? '').trigger('change');
+        $('#lista_precios').val(datos.lista_precios ?? '').trigger('change');
+        $('#canal_venta').val(datos.canal_venta ?? '');
+        $('#zona').val(datos.zona ?? '');
+        $('#clasificacion').val(datos.clasificacion ?? '');
+        $('#inicio_relacion').val(datos.inicio_relacion ?? '');
+
+        // Configuración
+        $('#notas').val(datos.configuracion?.notas ?? '');
+        $('#permitir_venta_con_deuda').prop('checked', datos.configuracion?.permitir_venta_con_deuda ?? false);
+        $('#aplica_descuento').prop('checked', datos.configuracion?.aplica_descuento ?? false);
+
+        // Financieros
+        $('#cupo_credito').val(datos.financieros?.cupo_credito ?? '');
+        $('#dias_credito').val(datos.financieros?.dias_credito ?? '');
+        $('#forma_pago').val(datos.financieros?.forma_pago ?? '').trigger('change');
+        $('#observaciones_crediticias').val(datos.financieros?.observaciones_crediticias ?? '');
+        $('#nivel_riesgo').val(datos.financieros?.nivel_riesgo ?? '');
+
+        // Tributarios
+        $('#agente_retencion').prop('checked', datos.tributarios?.agente_retencion ?? false);
+        $('#contribuyente_especial').prop('checked', datos.tributarios?.contribuyente_especial ?? false);
+        $('#obligado_contabilidad').prop('checked', datos.tributarios?.obligado_contabilidad ?? false);
+        $('#regimen_tributario').val(datos.tributarios?.regimen_tributario ?? '');
+        $('#retencion_fuente').val(datos.tributarios?.retencion_fuente ?? '');
+        $('#retencion_iva').val(datos.tributarios?.retencion_iva ?? '');
+
+        // KPI
+        $('#total_ventas').val(datos.kpi?.total_ventas ?? '');
+        $('#ultima_compra_fecha').val(datos.kpi?.ultima_compra_fecha ?? '');
+        $('#ultima_compra_monto').val(datos.kpi?.ultima_compra_monto ?? '');
+        $('#dias_promedio_pago').val(datos.kpi?.dias_promedio_pago ?? '');
+        $('#saldo_por_cobrar').val(datos.kpi?.saldo_por_cobrar ?? '');
+        $('#promedio_mensual').val(datos.kpi?.promedio_mensual ?? '');
+
+        // Documentos
+        const documentos = datos.documentos ?? [];
+        const contenedor = $('#documentos-container');
+        contenedor.find('.documento-item').remove();
+        documentos.forEach(doc => {
+            contenedor.append(`
+                <div class="col-md-6 documento-item mb-3">
+                    <div class="card border shadow-sm p-2">
+                        <p class="mb-1"><strong>Tipo:</strong> ${doc.tipo ?? 'N/A'}</p>
+                        <p class="mb-2"><strong>Archivo:</strong>
+                            <a href="/storage/${doc.archivo}" target="_blank">Ver Documento</a>
+                        </p>
+                        <button type="button" class="btn btn-sm btn-danger eliminar-documento" data-id="${doc.id}">
+                            Eliminar
+                        </button>
+                    </div>
+                </div>
+            `);
+        });
+
         $('#modalClienteLabel').html('<i class="fas fa-edit text-warning mr-2"></i> Editar Cliente');
         $('#modal-cliente').modal('show');
     }).fail(function () {
@@ -227,12 +334,56 @@ $(document).on('click', '.editar-cliente', function () {
 });
 
 
-$(document).on('click', '.eliminar-cliente', function () {
-    const id = $(this).data('id');
 
+    // Eliminar cliente
+    $(document).on('click', '.eliminar-cliente', function () {
+        const id = $(this).data('id');
+
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: "Esta acción eliminará el cliente.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/empresa/clientes/${id}`,
+                    type: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function (response) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: response.message,
+                            toast: true,
+                            timer: 1500,
+                            position: 'top-end',
+                            showConfirmButton: false
+                        });
+                        $('#tabla-clientes').DataTable().ajax.reload(null, false);
+                    },
+                    error: function (xhr) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: xhr.responseJSON?.message || 'No se pudo eliminar el cliente'
+                        });
+                    }
+                });
+            }
+        });
+    });
+});
+
+//para eliminar los documentos del clientes
+$(document).on('click', '.eliminar-documento', function () {
+    const id = $(this).data('id');
     Swal.fire({
-        title: '¿Estás seguro?',
-        text: "Esta acción eliminará el cliente.",
+        title: '¿Eliminar documento?',
+        text: "Esta acción no se puede deshacer.",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Sí, eliminar',
@@ -240,33 +391,23 @@ $(document).on('click', '.eliminar-cliente', function () {
     }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({
-                url: `/empresa/clientes/${id}`,
+                url: `/empresa/clientes/documentos/${id}`,
                 type: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
                 success: function (response) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: response.message,
-                        toast: true,
-                        timer: 1500,
-                        position: 'top-end',
-                        showConfirmButton: false
-                    });
-                    $('#tabla-clientes').DataTable().ajax.reload(null, false);
+                    Swal.fire('Eliminado', response.message, 'success');
+                    $(`.eliminar-documento[data-id="${id}"]`).closest('.documento-item').remove();
                 },
-                error: function (xhr) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: xhr.responseJSON?.message || 'No se pudo eliminar el cliente'
-                    });
+                error: function () {
+                    Swal.fire('Error', 'No se pudo eliminar el documento', 'error');
                 }
             });
         }
     });
 });
+
 
 </script>
 @endpush

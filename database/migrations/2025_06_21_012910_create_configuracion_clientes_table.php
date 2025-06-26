@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('datos_cliente_id')->constrained('datos_clientes')->onDelete('cascade');
             $table->text('notas')->nullable();
-            $table->boolean('permitir_venta_con_deuda')->default(true);
-            $table->boolean('aplica_descuento')->default(false);
+            $table->boolean('permitir_venta_con_deuda')->nullable();
+            $table->boolean('aplica_descuento')->nullable();
             $table->timestamps();
         });
     }

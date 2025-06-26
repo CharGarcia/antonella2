@@ -52,10 +52,11 @@ Route::middleware(['auth', 'verificar.permisos.submenu', 'can:gestionar-clientes
         Route::get('/data', [ClienteController::class, 'getData'])->name('data');
         Route::get('/crear', [ClienteController::class, 'create'])->name('create');
         Route::post('/', [ClienteController::class, 'store'])->name('store');
-        Route::get('/{cliente}/editar', [ClienteController::class, 'edit'])->name('edit');
+        Route::get('/{cliente}/edit', [ClienteController::class, 'edit'])->name('edit');
         Route::put('/{cliente}', [ClienteController::class, 'update'])->name('update');
         Route::delete('/{cliente}', [ClienteController::class, 'destroy'])->name('destroy');
         Route::get('/buscar-identificacion', [ClienteController::class, 'buscarPorIdentificacion'])->name('buscarPorIdentificacion');
+        Route::delete('/documentos/{documento}', [ClienteController::class, 'eliminarDocumento'])->name('documentos.eliminar');
     });
 
 

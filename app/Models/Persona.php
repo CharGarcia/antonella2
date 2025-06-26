@@ -26,12 +26,10 @@ class Persona extends Model
         'provincia',
         'ciudad',
         'pais',
-        'estado_tipo',
     ];
 
     protected $casts = [
         'tipo' => 'array',
-        'estado_tipo' => 'array',
     ];
 
     // Relaciones
@@ -49,5 +47,10 @@ class Persona extends Model
     public function scopeClientes($query)
     {
         return $query->whereJsonContains('tipo', 'cliente');
+    }
+
+    public function datosCliente()
+    {
+        return $this->hasOne(DatosCliente::class, 'persona_id');
     }
 }

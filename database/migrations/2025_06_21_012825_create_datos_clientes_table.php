@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('zona')->nullable();
             $table->string('clasificacion')->nullable();
             $table->date('inicio_relacion')->nullable();
-            $table->enum('estado', ['activo', 'inactivo', 'bloqueado'])->default('activo');
+            $table->enum('estado', ['activo', 'inactivo'])->default('activo');
             $table->json('configuracion_especial')->nullable();
             $table->timestamps();
         });

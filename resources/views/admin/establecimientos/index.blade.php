@@ -373,79 +373,79 @@ $(document).ready(function () {
 
          // Guardar o editar
          $('#form-establecimiento').on('submit', function (e) {
-    e.preventDefault();
+            e.preventDefault();
 
-    const id = $('#establecimiento_id').val();
-    const url = id ? `/establecimientos/update/${id}` : '{{ route("establecimientos.store") }}';
-    const method = id ? 'POST' : 'POST';
+            const id = $('#establecimiento_id').val();
+            const url = id ? `/establecimientos/update/${id}` : '{{ route("establecimientos.store") }}';
+            const method = id ? 'POST' : 'POST';
 
-    const formData = new FormData();
+            const formData = new FormData();
 
-    // Campo oculto _method solo si es actualización
-    if (id) formData.append('_method', 'PUT');
+            // Campo oculto _method solo si es actualización
+            if (id) formData.append('_method', 'PUT');
 
-    // Token CSRF
-    formData.append('_token', $('input[name="_token"]').val());
+            // Token CSRF
+            formData.append('_token', $('input[name="_token"]').val());
 
-    // Archivo logo
-    const archivoLogo = $('#logo')[0].files[0];
-    if (archivoLogo) {
-        formData.append('logo', archivoLogo);
-    }
-
-    // Campos del formulario
-    formData.append('empresa_id', $('#empresa_id').val());
-    formData.append('serie', $('#serie').val());
-    formData.append('nombre_comercial', $('#nombre_comercial').val());
-    formData.append('direccion', $('#direccion').val());
-    formData.append('estado', $('#estado').val());
-
-    const camposNumericos = [
-        'factura', 'nota_credito', 'nota_debito', 'guia_remision', 'retencion',
-        'liquidacion_compra', 'proforma', 'recibo', 'ingreso', 'egreso',
-        'orden_compra', 'pedido', 'consignacion_venta', 'decimal_cantidad', 'decimal_precio'
-    ];
-
-    camposNumericos.forEach(campo => {
-        formData.append(campo, $('#' + campo).val());
-    });
-
-    $.ajax({
-        url: url,
-        type: method,
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: function (res) {
-            $('#modal-establecimiento').modal('hide');
-            $('#tabla-establecimientos').DataTable().ajax.reload();
-
-            Swal.fire({
-                icon: 'success',
-                title: res.message,
-                timer: 2000,
-                showConfirmButton: false
-            });
-        },
-        error: function (xhr) {
-            if (xhr.status === 422) {
-                let errores = xhr.responseJSON.errors;
-                let mensaje = '';
-                for (let campo in errores) {
-                    mensaje += errores[campo][0] + '<br>';
-                }
-
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Errores de validación',
-                    html: mensaje
-                });
-            } else {
-                Swal.fire('Error', 'Hubo un problema al guardar el establecimiento.', 'error');
+            // Archivo logo
+            const archivoLogo = $('#logo')[0].files[0];
+            if (archivoLogo) {
+                formData.append('logo', archivoLogo);
             }
-        }
-    });
-});
+
+            // Campos del formulario
+            formData.append('empresa_id', $('#empresa_id').val());
+            formData.append('serie', $('#serie').val());
+            formData.append('nombre_comercial', $('#nombre_comercial').val());
+            formData.append('direccion', $('#direccion').val());
+            formData.append('estado', $('#estado').val());
+
+            const camposNumericos = [
+                'factura', 'nota_credito', 'nota_debito', 'guia_remision', 'retencion',
+                'liquidacion_compra', 'proforma', 'recibo', 'ingreso', 'egreso',
+                'orden_compra', 'pedido', 'consignacion_venta', 'decimal_cantidad', 'decimal_precio'
+            ];
+
+            camposNumericos.forEach(campo => {
+                formData.append(campo, $('#' + campo).val());
+            });
+
+            $.ajax({
+                url: url,
+                type: method,
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (res) {
+                    $('#modal-establecimiento').modal('hide');
+                    $('#tabla-establecimientos').DataTable().ajax.reload();
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: res.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                },
+                error: function (xhr) {
+                    if (xhr.status === 422) {
+                        let errores = xhr.responseJSON.errors;
+                        let mensaje = '';
+                        for (let campo in errores) {
+                            mensaje += errores[campo][0] + '<br>';
+                        }
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Errores de validación',
+                            html: mensaje
+                        });
+                    } else {
+                        Swal.fire('Error', 'Hubo un problema al guardar el establecimiento.', 'error');
+                    }
+                }
+            });
+        });
 
         // Editar
         $(document).on('click', '.editar-establecimiento', function () {

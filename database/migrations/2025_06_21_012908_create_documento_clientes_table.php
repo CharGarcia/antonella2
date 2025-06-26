@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('documentos_clientes', function (Blueprint $table) {
+        Schema::create('documento_clientes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('datos_cliente_id')->constrained('datos_clientes')->onDelete('cascade');
             $table->string('tipo')->nullable(); // contrato, RUC, certificado

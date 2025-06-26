@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Validation\Rule;
+use App\Models\ListaPrecio;
+use Illuminate\Support\Facades\Auth;
 
 class EstablecimientoController extends Controller
 {
@@ -51,6 +53,27 @@ class EstablecimientoController extends Controller
 
     public function store(Request $request)
     {
+
+        $establecimiento = Establecimiento::create($request->all());
+
+        $listas = [
+            ['nombre' => 'Precio general', 'descripcion' => 'Lista estándar'],
+        ];
+
+        foreach ($listas as $item) {
+            ListaPrecio::firstOrCreate(
+                [
+                    'nombre' => $item['nombre'],
+                    'id_establecimiento' => $establecimiento->id,
+                ],
+                [
+                    'descripcion' => $item['descripcion'],
+                    'id_user' => Auth::id(),
+                    'estado' => true,
+                ]
+            );
+        }
+
         $validated = $request->validate([
             'empresa_id' => 'required|exists:empresas,id',
             'nombre_comercial' => 'nullable|string|max:255',
@@ -114,9 +137,9 @@ class EstablecimientoController extends Controller
         return response()->json($Establecimiento);
     }
 
-
     public function update(Request $request, Establecimiento $establecimiento)
     {
+        // Validar primero
         $validated = $request->validate([
             'empresa_id' => 'required|exists:empresas,id',
             'nombre_comercial' => 'nullable|string|max:255',
@@ -147,13 +170,13 @@ class EstablecimientoController extends Controller
             'estado' => 'required|in:0,1',
         ]);
 
-        // Si sube nuevo logo, se guarda y reemplaza el anterior
+        // Procesar el logo si se ha cargado
         if ($request->hasFile('logo')) {
             $archivo = $request->file('logo');
             $nombre = uniqid('logo_') . '.' . $archivo->getClientOriginalExtension();
             $archivo->storeAs('logos_establecimientos', $nombre, 'public');
 
-            // Opcional: eliminar logo anterior
+            // Eliminar logo anterior si existe
             if ($establecimiento->logo && Storage::disk('public')->exists('logos_establecimientos/' . $establecimiento->logo)) {
                 Storage::disk('public')->delete('logos_establecimientos/' . $establecimiento->logo);
             }
@@ -161,13 +184,34 @@ class EstablecimientoController extends Controller
             $validated['logo'] = $nombre;
         }
 
+        // Actualizar el establecimiento con datos validados
         $establecimiento->update($validated);
+
+        // Asegurar que las listas de precios estén creadas
+        $listas = [
+            ['nombre' => 'Precio general', 'descripcion' => 'Lista estándar'],
+        ];
+
+        foreach ($listas as $item) {
+            \App\Models\ListaPrecio::firstOrCreate(
+                [
+                    'nombre' => $item['nombre'],
+                    'id_establecimiento' => $establecimiento->id,
+                ],
+                [
+                    'descripcion' => $item['descripcion'],
+                    'id_user' => Auth::id(),
+                    'estado' => true,
+                ]
+            );
+        }
 
         return response()->json([
             'success' => true,
             'message' => 'Establecimiento actualizado correctamente.'
         ]);
     }
+
 
 
     public function edit($id)
@@ -179,8 +223,6 @@ class EstablecimientoController extends Controller
 
     public function cambiar(Request $request)
     {
-        //session(['establecimiento_id' => $request->establecimiento_id]);
-        //return response()->json(['success' => true]);
         $request->validate([
             'establecimiento_id' => 'required|exists:establecimientos,id',
         ]);

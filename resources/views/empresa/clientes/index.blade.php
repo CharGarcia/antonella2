@@ -86,7 +86,7 @@ $(function () {
             { data: 'telefono' },
             { data: 'email' },
             { data: 'direccion' },
-            { data: 'estado_tipo'},
+            { data: 'estado'},
             { data: 'acciones', orderable: false, searchable: false }
         ],
         language: {

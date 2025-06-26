@@ -26,8 +26,7 @@ class CreatePersonasTable extends Migration
             $table->string('provincia', 50)->nullable();
             $table->string('ciudad', 50)->nullable();
             $table->string('pais', 50)->nullable(); // masculino, femenino, otro
-            $table->json('estado_tipo')->nullable(); // Ej: {"cliente":"activo", "empleado":"inactivo"}
-            $table->timestamps();
+             $table->timestamps();
         });
     }
 

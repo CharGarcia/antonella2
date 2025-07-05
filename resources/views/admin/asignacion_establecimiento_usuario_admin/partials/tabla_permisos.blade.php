@@ -16,16 +16,24 @@
         <div class="card mb-2">
             <div class="card-header p-2" id="heading-{{ Str::slug($menu) }}">
                 <h2 class="mb-0">
-                    <button class="btn btn-link text-left w-100" type="button" data-toggle="collapse" data-target="#collapse-{{ Str::slug($menu) }}" aria-expanded="false" aria-controls="collapse-{{ Str::slug($menu) }}">
-                        {{ strtoupper($menu) }}
+                    <button class="btn btn-outline-primary btn-xs d-flex justify-content-between align-items-center w-100"
+                        type="button"
+                        data-toggle="collapse"
+                        data-target="#collapse-{{ Str::slug($menu) }}"
+                        aria-expanded="false"
+                        aria-controls="collapse-{{ Str::slug($menu) }}">
+                        <span>{{ strtoupper($menu) }}</span>
+                        <i class="fas fa-chevron-down"></i>
                     </button>
                 </h2>
             </div>
 
-            <div id="collapse-{{ Str::slug($menu) }}" class="collapse show" aria-labelledby="heading-{{ Str::slug($menu) }}" data-parent="#acordeon-permisos">
+            <div id="collapse-{{ Str::slug($menu) }}"
+                 class="collapse show"
+                 aria-labelledby="heading-{{ Str::slug($menu) }}">
                 <div class="card-body p-2">
                     <table class="table table-sm table-bordered">
-                        <thead class="table-light">
+                        <thead class="thead-light">
                             <tr>
                                 <th style="width: 35%;">Módulo</th>
                                 @foreach(['ver', 'crear', 'modificar', 'eliminar'] as $accion)
@@ -47,10 +55,9 @@
                                     </td>
                                     @foreach(['ver', 'crear', 'modificar', 'eliminar'] as $accion)
                                         <td class="text-center">
-                                            <div class="form-check form-switch d-flex justify-content-center">
+                                            <div class="form-check d-flex justify-content-center">
                                                 <input class="form-check-input"
                                                        type="checkbox"
-                                                       role="switch"
                                                        name="permisos[{{ $modulo->submenu_id }}][{{ $accion }}]"
                                                        {{ optional($permiso)->$accion ? 'checked' : '' }}>
                                             </div>
@@ -65,4 +72,3 @@
         </div>
     @endforeach
 </div>
-

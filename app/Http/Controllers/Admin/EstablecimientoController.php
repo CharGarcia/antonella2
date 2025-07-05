@@ -53,27 +53,7 @@ class EstablecimientoController extends Controller
 
     public function store(Request $request)
     {
-
-        $establecimiento = Establecimiento::create($request->all());
-
-        $listas = [
-            ['nombre' => 'Precio general', 'descripcion' => 'Lista estándar'],
-        ];
-
-        foreach ($listas as $item) {
-            ListaPrecio::firstOrCreate(
-                [
-                    'nombre' => $item['nombre'],
-                    'id_establecimiento' => $establecimiento->id,
-                ],
-                [
-                    'descripcion' => $item['descripcion'],
-                    'id_user' => Auth::id(),
-                    'estado' => true,
-                ]
-            );
-        }
-
+        // VALIDAR PRIMERO
         $validated = $request->validate([
             'empresa_id' => 'required|exists:empresas,id',
             'nombre_comercial' => 'nullable|string|max:255',
@@ -106,7 +86,6 @@ class EstablecimientoController extends Controller
 
         // Procesar el logo si viene
         if ($request->hasFile('logo')) {
-            dd('llegó');
             try {
                 $archivo = $request->file('logo');
                 $nombre = uniqid('logo_') . '.' . $archivo->getClientOriginalExtension();
@@ -121,15 +100,33 @@ class EstablecimientoController extends Controller
             }
         }
 
-        // Crear el registro con todo incluido
-        Establecimiento::create($validated);
+        // Crear el establecimiento
+        $establecimiento = Establecimiento::create($validated);
+
+        // Crear listas de precios asociadas
+        $listas = [
+            ['nombre' => 'Precio general', 'descripcion' => 'Lista estándar'],
+        ];
+
+        foreach ($listas as $item) {
+            ListaPrecio::firstOrCreate(
+                [
+                    'nombre' => $item['nombre'],
+                    'id_establecimiento' => $establecimiento->id,
+                ],
+                [
+                    'descripcion' => $item['descripcion'],
+                    'id_user' => Auth::id(),
+                    'estado' => true,
+                ]
+            );
+        }
 
         return response()->json([
             'success' => true,
             'message' => 'Establecimiento creado correctamente.'
         ]);
     }
-
 
 
     public function show(Establecimiento $Establecimiento)

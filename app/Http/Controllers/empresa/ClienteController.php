@@ -11,14 +11,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\Persona;
-use App\Models\DatosCliente;
-use App\Models\DatosFinancierosCliente;
-use App\Models\DatosTributariosCliente;
 use App\Models\DocumentoCliente;
-use App\Models\HistorialCliente;
-use App\Models\KpiCliente;
 use App\Models\ListaPrecio;
-use App\Models\Vendedor;
 use App\Models\FormasPagoSri;
 
 
@@ -26,10 +20,11 @@ class ClienteController extends Controller
 {
     public function index()
     {
-        $vendedores = Vendedor::where('id_establecimiento', session('establecimiento_id'))
-            ->where('estado', true)
+        $vendedores = Persona::query()
+            ->where('id_establecimiento', session('establecimiento_id'))
+            ->whereJsonContains('tipo', ['vendedor'])
             ->orderBy('nombre')
-            ->pluck('nombre', 'id'); // ['1' => 'Juan Pérez', ...]
+            ->pluck('nombre', 'id');
 
         $listasPrecios = ListaPrecio::where('id_establecimiento', session('establecimiento_id'))
             ->where('estado', true)

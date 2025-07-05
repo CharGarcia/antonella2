@@ -1,11 +1,10 @@
 @extends('adminlte::master')
-
 @inject('layoutHelper', 'JeroenNoten\LaravelAdminLte\Helpers\LayoutHelper')
 @inject('preloaderHelper', 'JeroenNoten\LaravelAdminLte\Helpers\PreloaderHelper')
 
 @section('adminlte_css')
-    @vite(['resources/css/app.css'])
-    @livewireStyles
+@vite(['resources/js/app.js'])
+@livewireStyles
     @stack('css')
     @yield('css')
 @stop
@@ -13,7 +12,6 @@
 @section('classes_body', $layoutHelper->makeBodyClasses() . ' compact-ui')
 
 @section('body_data', $layoutHelper->makeBodyData())
-
 @section('body')
     <div class="wrapper">
         {{-- Preloader Animation (fullscreen mode) --}}

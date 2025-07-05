@@ -1,14 +1,14 @@
 <!-- resources/views/partials/modal_cliente.blade.php -->
 <!-- Modal -->
 
-<div class="modal fade" id="modal-cliente" tabindex="-1" data-backdrop="static" role="dialog" aria-labelledby="modalClienteLabel" aria-hidden="true">
+<div class="modal fade" id="modal-vendedor" tabindex="-1" data-backdrop="static" role="dialog" aria-labelledby="modalClienteLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
-        <form id="form-cliente">
+        <form id="form-vendedor">
             @csrf
-            <input type="hidden" name="cliente_id" id="cliente_id">
+            <input type="hidden" name="vendedor_id" id="vendedor_id">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalClienteLabel">Gestión de Cliente</h5>
+                    <h5 class="modal-title" id="modalVendedorLabel">Gestión de Vendedor</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -16,10 +16,15 @@
 
                 <div class="modal-body">
                     <!-- Pestañas con íconos -->
-                    <ul class="nav nav-tabs mb-3" id="clienteTabs" role="tablist">
+                    <ul class="nav nav-tabs mb-3" id="vendedorTabs" role="tablist">
                         <li class="nav-item">
                             <a class="nav-link active" data-toggle="tab" href="#tab-general">
                                 <i class="fas fa-user me-1"></i> General
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#tab-comercial">
+                                <i class="fas fa-dollar-sign me-1"></i> Comercial
                             </a>
                         </li>
                         <li class="nav-item">
@@ -27,41 +32,12 @@
                                 <i class="fas fa-dollar-sign me-1"></i> Financiero
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#tab-tributarios">
-                                <i class="fas fa-file-invoice me-1"></i> Tributario
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#tab-comercial">
-                                <i class="fas fa-briefcase me-1"></i> Comercial
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#tab-documentos">
-                                <i class="fas fa-folder-open me-1"></i> Documentos
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#tab-kpi">
-                                <i class="fas fa-chart-line me-1"></i> KPIs
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#tab-configuracion">
-                                <i class="fas fa-cogs me-1"></i> Configuración
-                            </a>
-                        </li>
                     </ul>
 
                     <div class="tab-content">
-                        @include('empresa.clientes.tabs.general')
-                        @include('empresa.clientes.tabs.financieros')
-                        @include('empresa.clientes.tabs.tributarios')
-                        @include('empresa.clientes.tabs.comercial')
-                        @include('empresa.clientes.tabs.documentos')
-                        @include('empresa.clientes.tabs.kpi')
-                        @include('empresa.clientes.tabs.configuracion')
+                        @include('empresa.vendedores.tabs.general')
+                        @include('empresa.vendedores.tabs.comercial')
+                        @include('empresa.vendedores.tabs.financieros')
                     </div>
                 </div>
 
@@ -81,7 +57,7 @@
     $('#telefono').inputmask('0999999999');
 
     // Al cerrar el modal, limpiar todos los campos del formulario
-    $('#modal-cliente').on('hidden.bs.modal', function () {
+    $('#modal-vendedor').on('hidden.bs.modal', function () {
         const form = $(this).find('form')[0];
         form.reset();
         $(form).find('input[type=hidden]').not('[name="_token"]').val('');
@@ -90,36 +66,22 @@
     });
 
     // Al mostrar el modal, activar la pestaña General
-    $('#modal-cliente').on('show.bs.modal', function () {
+    $('#modal-vendedor').on('show.bs.modal', function () {
         $(this).find('.nav-tabs a[href="#tab-general"]').tab('show');
     });
 
 
-    // Abrir modal nuevo cliente
-    $('#btn-nuevo-cliente').on('click', function () {
-        const form = $('#form-cliente')[0];
+    // Abrir modal nuevo vendedor
+    $('#btn-nuevo-vendedor').on('click', function () {
+        const form = $('#form-vendedor')[0];
         form.reset();
 
-        $('#form-cliente').find('input[type=hidden]').not('[name="_token"]').val('');
-        $('#form-cliente').find('input[type=checkbox]').prop('checked', false);
-        $('#form-cliente').find('select.select2').val('').trigger('change');
-        $('#cliente_id').val('');
-
-        // --- LIMPIEZA COMPLETA DEL TAB DOCUMENTOS ---
-        // Limpiar input file
-        $('#documentos-container input[type="file"]').val('');
-
-        // Limpiar tipos generados
-        $('#documentos-container #tipos-container').html('');
-
-        // Remover documentos previamente cargados
-        $('#documentos-container .documento-item').remove();
-
-        // Limpiar documentos-guardados por si acaso
-        $('#documentos-guardados').html('');
-
-        $('#modalClienteLabel').html('<i class="fas fa-clipboard-check text-success mr-2"></i> Nuevo Cliente');
-        $('#modal-cliente').modal('show');
+        $('#form-vendedor').find('input[type=hidden]').not('[name="_token"]').val('');
+        $('#form-vendedor').find('input[type=checkbox]').prop('checked', false);
+        $('#form-vendedor').find('select.select2').val('').trigger('change');
+        $('#vendedor_id').val('');
+        $('#modalVendedorLabel').html('<i class="fas fa-clipboard-check text-success mr-2"></i> Nuevo Vendedor');
+        $('#modal-vendedor').modal('show');
     });
 
 
@@ -134,11 +96,11 @@
         const esRucValido = tipo_identificacion === '04' && numero_identificacion.length === 13;
 
         if (esCedulaValida || esRucValido) {
-            $.get('{{ route("clientes.buscarPorIdentificacion") }}', { numero_identificacion }, function (data) {
+            $.get('{{ route("vendedores.buscarPorIdentificacion") }}', { numero_identificacion }, function (data) {
                 if (data.encontrado) {
                     const p = data.persona;
                     $('#nombre').val(p.nombre ?? '');
-                    $('#estado').val(p.datos_cliente?.estado ?? 'activo');
+                    $('#estado').val(p.datos_vendedor?.estado ?? 'activo');
                     $('#pais').val(p.pais ?? '');
                     $('#provincia').val(p.provincia ?? '');
                     $('#ciudad').val(p.ciudad ?? '');
@@ -204,11 +166,11 @@
         }
     });
 
-    // Guardar o editar cliente
-$('#form-cliente').on('submit', function (e) {
+    // Guardar o editar vendedor
+$('#form-vendedor').on('submit', function (e) {
     e.preventDefault();
-    const id = $('#cliente_id').val();
-    const url = id ? `/empresa/clientes/${id}` : '{{ route("clientes.store") }}';
+    const id = $('#vendedor_id').val();
+    const url = id ? `/empresa/vendedores/${id}` : '{{ route("vendedores.store") }}';
     const method = id ? 'POST' : 'POST'; // Laravel no acepta PUT con FormData directamente
 
     const formData = new FormData(this);
@@ -223,7 +185,7 @@ $('#form-cliente').on('submit', function (e) {
         contentType: false,
         processData: false,
         success: function (response) {
-            $('#modal-cliente').modal('hide');
+            $('#modal-vendedor').modal('hide');
             Swal.fire({
                 icon: 'success',
                 title: response.message,
@@ -233,7 +195,7 @@ $('#form-cliente').on('submit', function (e) {
                 showConfirmButton: false
             });
 
-            $('#tabla-clientes').DataTable().ajax.reload(null, false);
+            $('#tabla-vendedores').DataTable().ajax.reload(null, false);
         },
         error: function (xhr) {
             if (xhr.status === 422) {
@@ -260,15 +222,15 @@ $('#form-cliente').on('submit', function (e) {
 });
 
 
-    // Cargar cliente en edición
-$(document).on('click', '.editar-cliente', function () {
+    // Cargar vendedor en edición
+$(document).on('click', '.editar-vendedor', function () {
     const id = $(this).data('id');
-    const url = `/empresa/clientes/${id}/edit`;
+    const url = `/empresa/vendedores/${id}/edit`;
 
     $.get(url, function (res) {
-        const datos = res.datos_cliente ?? {};
+        const datos = res.datos_vendedor ?? {};
 
-        $('#cliente_id').val(res.id);
+        $('#vendedor_id').val(res.id);
         $('#tipo_identificacion').val(res.tipo_identificacion).trigger('change');
         $('#numero_identificacion').val(res.numero_identificacion);
         $('#nombre').val(res.nombre);
@@ -280,82 +242,31 @@ $(document).on('click', '.editar-cliente', function () {
         $('#pais').val(res.pais);
         $('#estado').val(datos.estado ?? 'activo');
 
-        // Datos cliente
+        // Datos vendedor
         $('#codigo_interno').val(datos.codigo_interno ?? '');
-        $('#categoria_cliente').val(datos.categoria_cliente ?? '');
-        $('#segmento').val(datos.segmento ?? '');
+        $('#perfil').val(datos.perfil ?? '');
         $('#fecha_registro').val(datos.fecha_registro ?? '');
-        $('#vendedor_asignado').val(datos.vendedor_asignado ?? '').trigger('change');
-        $('#lista_precios').val(datos.lista_precios ?? '').trigger('change');
-        $('#canal_venta').val(datos.canal_venta ?? '');
         $('#zona').val(datos.zona ?? '');
-        $('#clasificacion').val(datos.clasificacion ?? '');
         $('#inicio_relacion').val(datos.inicio_relacion ?? '');
+        $('#informacion_adicional').val(datos.informacion_adicional ?? '');
+        $('#monto_ventas_asignado').val(datos.monto_ventas_asignado ?? '');
 
-        // Configuración
-        $('#notas').val(datos.configuracion?.notas ?? '');
-        $('#permitir_venta_con_deuda').prop('checked', datos.configuracion?.permitir_venta_con_deuda ?? false);
-        $('#aplica_descuento').prop('checked', datos.configuracion?.aplica_descuento ?? false);
-
-        // Financieros
-        $('#cupo_credito').val(datos.financieros?.cupo_credito ?? '');
-        $('#dias_credito').val(datos.financieros?.dias_credito ?? '');
-        $('#forma_pago').val(datos.financieros?.forma_pago ?? '').trigger('change');
-        $('#observaciones_crediticias').val(datos.financieros?.observaciones_crediticias ?? '');
-        $('#nivel_riesgo').val(datos.financieros?.nivel_riesgo ?? '');
-
-        // Tributarios
-        $('#agente_retencion').prop('checked', datos.tributarios?.agente_retencion ?? false);
-        $('#contribuyente_especial').prop('checked', datos.tributarios?.contribuyente_especial ?? false);
-        $('#obligado_contabilidad').prop('checked', datos.tributarios?.obligado_contabilidad ?? false);
-        $('#regimen_tributario').val(datos.tributarios?.regimen_tributario ?? '');
-        $('#retencion_fuente').val(datos.tributarios?.retencion_fuente ?? '');
-        $('#retencion_iva').val(datos.tributarios?.retencion_iva ?? '');
-
-        // KPI
-        $('#total_ventas').val(datos.kpi?.total_ventas ?? '');
-        $('#ultima_compra_fecha').val(datos.kpi?.ultima_compra_fecha ?? '');
-        $('#ultima_compra_monto').val(datos.kpi?.ultima_compra_monto ?? '');
-        $('#dias_promedio_pago').val(datos.kpi?.dias_promedio_pago ?? '');
-        $('#saldo_por_cobrar').val(datos.kpi?.saldo_por_cobrar ?? '');
-        $('#promedio_mensual').val(datos.kpi?.promedio_mensual ?? '');
-
-        // Documentos
-        const documentos = datos.documentos ?? [];
-        const contenedor = $('#documentos-container');
-        contenedor.find('.documento-item').remove();
-        documentos.forEach(doc => {
-            contenedor.append(`
-                <div class="col-md-6 documento-item mb-3">
-                    <div class="card border shadow-sm p-2">
-                        <p class="mb-1"><strong>Tipo:</strong> ${doc.tipo ?? 'N/A'}</p>
-                        <p class="mb-2"><strong>Archivo:</strong>
-                            <a href="/storage/${doc.archivo}" target="_blank">Ver Documento</a>
-                        </p>
-                        <button type="button" class="btn btn-sm btn-danger eliminar-documento" data-id="${doc.id}">
-                            Eliminar
-                        </button>
-                    </div>
-                </div>
-            `);
-        });
-
-        $('#modalClienteLabel').html('<i class="fas fa-edit text-warning mr-2"></i> Editar Cliente');
-        $('#modal-cliente').modal('show');
+        $('#modalVendedorLabel').html('<i class="fas fa-edit text-warning mr-2"></i> Editar Vendedor');
+        $('#modal-vendedor').modal('show');
     }).fail(function () {
-        Swal.fire('Error', 'No se pudo cargar el cliente', 'error');
+        Swal.fire('Error', 'No se pudo cargar el vendedor', 'error');
     });
 });
 
 
 
-    // Eliminar cliente
-    $(document).on('click', '.eliminar-cliente', function () {
+    // Eliminar vendedor
+    $(document).on('click', '.eliminar-vendedor', function () {
         const id = $(this).data('id');
 
         Swal.fire({
             title: '¿Estás seguro?',
-            text: "Esta acción eliminará el cliente.",
+            text: "Esta acción eliminará el vendedor.",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Sí, eliminar',
@@ -363,7 +274,7 @@ $(document).on('click', '.editar-cliente', function () {
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/empresa/clientes/${id}`,
+                    url: `/empresa/vendedores/${id}`,
                     type: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -377,13 +288,13 @@ $(document).on('click', '.editar-cliente', function () {
                             position: 'top-end',
                             showConfirmButton: false
                         });
-                        $('#tabla-clientes').DataTable().ajax.reload(null, false);
+                        $('#tabla-vendedores').DataTable().ajax.reload(null, false);
                     },
                     error: function (xhr) {
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
-                            text: xhr.responseJSON?.message || 'No se pudo eliminar el cliente'
+                            text: xhr.responseJSON?.message || 'No se pudo eliminar el vendedor'
                         });
                     }
                 });
@@ -391,37 +302,6 @@ $(document).on('click', '.editar-cliente', function () {
         });
     });
 });
-
-//para eliminar los documentos del clientes
-$(document).on('click', '.eliminar-documento', function () {
-    const id = $(this).data('id');
-    Swal.fire({
-        title: '¿Eliminar documento?',
-        text: "Esta acción no se puede deshacer.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.ajax({
-                url: `/empresa/clientes/documentos/${id}`,
-                type: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function (response) {
-                    Swal.fire('Eliminado', response.message, 'success');
-                    $(`.eliminar-documento[data-id="${id}"]`).closest('.documento-item').remove();
-                },
-                error: function () {
-                    Swal.fire('Error', 'No se pudo eliminar el documento', 'error');
-                }
-            });
-        }
-    });
-});
-
 
 </script>
 @endpush

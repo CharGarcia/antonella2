@@ -1,0 +1,106 @@
+/* ==============================
+   GLOBAL SM STYLES - TODA LA APP
+   ============================== */
+
+/* BODY */
+body {
+    font-size: 0.875rem; /* 14px */
+}
+
+/* INPUTS */
+.form-control {
+    height: 32px !important;
+    font-size: 0.875rem !important;
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+}
+
+/* SELECTS */
+.form-select,
+select.form-control {
+    height: 32px !important;
+    font-size: 0.875rem !important;
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+}
+
+/* TEXTAREAS */
+textarea.form-control {
+    min-height: 32px !important;
+    font-size: 0.875rem !important;
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+}
+
+/* BOTONES */
+.btn {
+    height: 32px !important;
+    line-height: 32px !important;
+    font-size: 0.875rem !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+/* CARDS */
+.card {
+    padding: 0.75rem !important;
+    font-size: 0.875rem !important;
+}
+
+/* MODALS */
+.modal-body {
+    min-height: 150px !important;
+    font-size: 0.875rem !important;
+    padding: 1rem !important;
+}
+
+/* DATATABLES - FILAS */
+table.dataTable tbody tr {
+    height: 36px !important;
+}
+
+/* DATATABLES - CELDAS */
+table.dataTable tbody td,
+table.dataTable thead th {
+    vertical-align: middle !important;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    font-size: 0.875rem !important;
+}
+
+
+/* ============================
+   XS BUTTONS ONLY FOR DATATABLES
+   ============================ */
+
+/* ============================
+   XS BUTTONS ONLY FOR DATATABLES
+   ============================ */
+
+table.dataTable .btn-xs {
+    height: 26px !important;
+    line-height: 1 !important;
+    font-size: 0.75rem !important; /* 12px */
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    padding-left: 0.4rem !important;
+    padding-right: 0.4rem !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    min-width: auto;
+    border-radius: 0.2rem;
+}
+
+
+/* ÍCONOS dentro de botones XS */
+table.dataTable .btn-xs i,
+table.dataTable .btn-xs svg {
+    font-size: 0.75rem !important; /* 12px */
+    width: 0.75rem !important;
+    height: 0.75rem !important;
+    margin-right: 0.25rem;
+    vertical-align: middle;
+}
+

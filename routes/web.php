@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\AsignacionEstablecimientoUsuarioAdminController;
 use App\Http\Controllers\Auth\RegistroController;
 use App\Http\Controllers\Admin\UsuarioAsignadoController;
 use App\Http\Controllers\empresa\ClienteController;
+use App\Http\Controllers\Empresa\VendedorController;
 
 
 Route::get('/', function () {
@@ -42,8 +43,28 @@ Route::get('completar-registro/{token}', [RegistroController::class, 'mostrarFor
 Route::post('completar-registro/{token}', [RegistroController::class, 'guardarDatos'])->name('completar-registro.guardar');
 
 
+//para vendedores
+//permiso admin user: gestionar-vendedores
+//ruta para submenus: vendedores.vendedores
+Route::middleware(['auth', 'verificar.permisos.submenu', 'can:gestionar-vendedores'])
+    ->prefix('empresa/vendedores')
+    ->name('vendedores.')
+    ->group(function () {
+        Route::get('/', [VendedorController::class, 'index'])->name('vendedores');
+        Route::get('/data', [VendedorController::class, 'getData'])->name('data');
+        Route::get('/crear', [VendedorController::class, 'create'])->name('create');
+        Route::post('/', [VendedorController::class, 'store'])->name('store');
+        Route::get('/{vendedor}/edit', [VendedorController::class, 'edit'])->name('edit');
+        Route::put('/{vendedor}', [VendedorController::class, 'update'])->name('update');
+        Route::delete('/{vendedor}', [VendedorController::class, 'destroy'])->name('destroy');
+        Route::get('/buscar-identificacion', [VendedorController::class, 'buscarPorIdentificacion'])->name('buscarPorIdentificacion');
+    });
+
+
+
 // para clientes
 //permiso admin user: gestionar-clientes
+//ruta para submenus: clientes.clientes
 Route::middleware(['auth', 'verificar.permisos.submenu', 'can:gestionar-clientes'])
     ->prefix('empresa/clientes')
     ->name('clientes.')

@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\User;
+use App\Models\Admin\User;
 use Laravel\Jetstream\Features;
 
 test('confirm password screen can be rendered', function () {

@@ -61,7 +61,7 @@
                     <div class="form-group col-md-12 mb-2">
                         <label for="user_id">Usuario</label>
                     <select name="user_id" id="user_id" class="form-control" required>
-                        @foreach(\App\Models\User::where('status', true)->orderBy('name')->get() as $user)
+                        @foreach(\App\Models\Admin\User::where('status', true)->orderBy('name')->get() as $user)
                             <option value="{{ $user->id }}">{{ $user->name }} - {{ $user->email }}</option>
                         @endforeach
                     </select>
@@ -69,7 +69,7 @@
                     <div class="form-group col-md-12 mb-2">
                         <label for="establecimiento_id">Establecimiento</label>
                         <select name="establecimiento_id" id="establecimiento_id" class="form-control" required>
-                            @foreach(\App\Models\Establecimiento::orderBy('nombre_comercial')->get() as $establecimiento)
+                            @foreach(\App\Models\Empresa\Establecimiento::orderBy('nombre_comercial')->get() as $establecimiento)
                                 <option value="{{ $establecimiento->id }}">{{ $establecimiento->nombre_comercial }} - {{ $establecimiento->serie }}</option>
                             @endforeach
                         </select>

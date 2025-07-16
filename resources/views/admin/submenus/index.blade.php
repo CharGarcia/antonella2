@@ -35,7 +35,7 @@
                             <th>
                                 <select id="filtro-menu" class="form-control form-control-sm filtro-select" style="width: 100%;">
                                     <option value="">Todos</option>
-                                    @foreach(App\Models\Menu::orderBy('nombre')->get() as $menu)
+                                    @foreach(App\Models\Admin\Menu::orderBy('nombre')->get() as $menu)
                                         <option value="{{ $menu->nombre }}">{{ $menu->nombre }}</option>
                                     @endforeach
                                 </select>
@@ -77,7 +77,7 @@
                 <div class="form-group col-md-12">
                   <label for="menu_id">Menú</label>
                   <select class="form-control" name="menu_id" id="menu_id" required>
-                    @foreach(App\Models\Menu::all() as $menu)
+                    @foreach(App\Models\Admin\Menu::all() as $menu)
                       <option value="{{ $menu->id }}">{{ $menu->nombre }}</option>
                     @endforeach
                   </select>

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\Empresa;
+use App\Models\Empresa\Empresa;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
@@ -136,5 +136,4 @@ class EmpresaController extends Controller
 
         return response()->json($empresas);
     }
-
 }

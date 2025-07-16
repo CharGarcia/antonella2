@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use Illuminate\Support\Facades\Storage;
-use App\Models\Establecimiento;
+use App\Models\Empresa\Establecimiento;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Validation\Rule;
-use App\Models\ListaPrecio;
+use App\Models\Empresa\Productos\ListaPrecio;
 use Illuminate\Support\Facades\Auth;
 
 class EstablecimientoController extends Controller
@@ -190,7 +190,7 @@ class EstablecimientoController extends Controller
         ];
 
         foreach ($listas as $item) {
-            \App\Models\ListaPrecio::firstOrCreate(
+            \App\Models\Empresa\Productos\ListaPrecio::firstOrCreate(
                 [
                     'nombre' => $item['nombre'],
                     'id_establecimiento' => $establecimiento->id,

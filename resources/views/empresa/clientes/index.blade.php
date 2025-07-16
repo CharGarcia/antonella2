@@ -63,6 +63,7 @@
 @section('js')
 <script>
 $(function () {
+
     let tabla = $('#tabla-clientes').DataTable({
         dom: '<"row"<"col-md-2 text-left">>rt<"row"<"col-md-12 text-center"p>>',
         processing: false,

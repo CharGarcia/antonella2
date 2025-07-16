@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\RetencionSri;
+use App\Models\Admin\RetencionSri;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 

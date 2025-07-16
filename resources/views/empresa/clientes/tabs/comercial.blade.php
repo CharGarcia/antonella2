@@ -3,11 +3,12 @@
     <div class="card">
         <div class="card-body">
     <div class="row">
+                        @include('components.input', ['nombre' => 'nombre_comercial', 'label' => 'Nombre comercial', 'col' => 'col-md-12'])
         @include('components.input', ['nombre' => 'codigo_interno', 'label' => 'Código Interno', 'col' => 'col-md-4'])
         @include('components.select', [
             'nombre' => 'categoria_cliente',
             'label' => 'Categoría',
-            'opciones' => ['Minorista', 'Mayorista', 'Distribuidor', 'Cliente Final', 'OEM'],
+            'opciones' => ['Minorista', 'Mayorista', 'Distribuidor', 'Cliente Final'],
             'col' => 'col-md-4', 'mostrarPrimeraOpcion' => true
         ])
         @include('components.select', [
@@ -43,9 +44,14 @@
         ])
         @include('components.date', [
             'nombre' => 'inicio_relacion',
-            'label' => 'Inicio de relación',
-            'value' => now()->toDateString(),
-            'disabled' => true, 'col' => 'col-md-4'
+            'label'  => 'Inicio de relación',
+            'value'  => old(
+                'inicio_relacion',
+                isset($cliente) && $cliente->inicio_relacion_formatted
+                    ? $cliente->inicio_relacion_formatted
+                    : now()->format('d/m/Y')
+            ),
+            'col'    => 'col-md-4'
         ])
     </div>
 </div>

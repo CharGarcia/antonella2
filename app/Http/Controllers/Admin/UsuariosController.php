@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\User;
+use App\Models\Admin\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-//use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Role;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\InvitacionRegistro;
 use Illuminate\Support\Facades\Auth;
-use App\Models\UsuarioAsignado;
+use App\Models\Admin\UsuarioAsignado;
 
 class UsuariosController extends Controller
 {

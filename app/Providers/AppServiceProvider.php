@@ -6,8 +6,8 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Menu;
-use App\Models\Establecimiento;
+use App\Models\Admin\Menu;
+use App\Models\Empresa\Establecimiento;
 
 class AppServiceProvider extends ServiceProvider
 {

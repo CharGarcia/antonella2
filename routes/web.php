@@ -17,6 +17,8 @@ use App\Http\Controllers\Auth\RegistroController;
 use App\Http\Controllers\Admin\UsuarioAsignadoController;
 use App\Http\Controllers\empresa\ClienteController;
 use App\Http\Controllers\Empresa\VendedorController;
+use App\Http\Controllers\empresa\ProveedorController;
+use App\Http\Controllers\Empresa\PersonaController;
 
 
 Route::get('/', function () {
@@ -42,6 +44,15 @@ Route::post('/establecimiento/cambiar', [EstablecimientoController::class, 'camb
 Route::get('completar-registro/{token}', [RegistroController::class, 'mostrarFormulario'])->name('completar-registro.formulario');
 Route::post('completar-registro/{token}', [RegistroController::class, 'guardarDatos'])->name('completar-registro.guardar');
 
+//ruta de persona
+Route::middleware(['auth'])
+    ->prefix('empresa/personas')
+    ->name('personas.')
+    ->group(function () {
+        Route::get('/buscar-identificacion', [PersonaController::class, 'buscarPorIdentificacion'])
+            ->name('buscarPorIdentificacion');
+    });
+
 
 //para vendedores
 //permiso admin user: gestionar-vendedores
@@ -57,7 +68,7 @@ Route::middleware(['auth', 'verificar.permisos.submenu', 'can:gestionar-vendedor
         Route::get('/{vendedor}/edit', [VendedorController::class, 'edit'])->name('edit');
         Route::put('/{vendedor}', [VendedorController::class, 'update'])->name('update');
         Route::delete('/{vendedor}', [VendedorController::class, 'destroy'])->name('destroy');
-        Route::get('/buscar-identificacion', [VendedorController::class, 'buscarPorIdentificacion'])->name('buscarPorIdentificacion');
+        //Route::get('/buscar-identificacion', [VendedorController::class, 'buscarPorIdentificacion'])->name('buscarPorIdentificacion');
     });
 
 
@@ -76,8 +87,27 @@ Route::middleware(['auth', 'verificar.permisos.submenu', 'can:gestionar-clientes
         Route::get('/{cliente}/edit', [ClienteController::class, 'edit'])->name('edit');
         Route::put('/{cliente}', [ClienteController::class, 'update'])->name('update');
         Route::delete('/{cliente}', [ClienteController::class, 'destroy'])->name('destroy');
-        Route::get('/buscar-identificacion', [ClienteController::class, 'buscarPorIdentificacion'])->name('buscarPorIdentificacion');
+        //Route::get('/buscar-identificacion', [ClienteController::class, 'buscarPorIdentificacion'])->name('buscarPorIdentificacion');
         Route::delete('/documentos/{documento}', [ClienteController::class, 'eliminarDocumento'])->name('documentos.eliminar');
+    });
+
+
+// para proveedores
+//permiso admin user: gestionar-proveedores
+//ruta para submenus: proveedores.proveedores
+Route::middleware(['auth', 'verificar.permisos.submenu', 'can:gestionar-proveedores'])
+    ->prefix('empresa/proveedores')
+    ->name('proveedores.')
+    ->group(function () {
+        Route::get('/', [ProveedorController::class, 'index'])->name('proveedores');
+        Route::get('/data', [ProveedorController::class, 'getData'])->name('data');
+        Route::get('/crear', [ProveedorController::class, 'create'])->name('create');
+        Route::post('/', [ProveedorController::class, 'store'])->name('store');
+        Route::get('/{proveedor}/edit', [ProveedorController::class, 'edit'])->name('edit');
+        Route::put('/{proveedor}', [ProveedorController::class, 'update'])->name('update');
+        Route::delete('/{proveedor}', [ProveedorController::class, 'destroy'])->name('destroy');
+        //Route::get('/buscar-identificacion', [ProveedorController::class, 'buscarPorIdentificacion'])->name('buscarPorIdentificacion');
+        Route::delete('/documentos/{documento}', [ProveedorController::class, 'eliminarDocumento'])->name('documentos.eliminar');
     });
 
 

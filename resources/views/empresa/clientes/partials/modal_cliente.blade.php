@@ -1,10 +1,42 @@
-<!-- resources/views/partials/modal_cliente.blade.php -->
-<!-- Modal -->
+<style>
+    #clienteTabs {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: hidden;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #clienteTabs:hover {
+        overflow-x: auto;
+    }
+
+    #clienteTabs .nav-link {
+        white-space: nowrap;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+
+    /* Opcional: ocultar feo scrollbar en algunos navegadores */
+    #clienteTabs::-webkit-scrollbar {
+        height: 5px;
+    }
+
+    #clienteTabs::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.3);
+        border-radius: 3px;
+    }
+
+    #clienteTabs::-webkit-scrollbar-track {
+        background-color: transparent;
+    }
+</style>
+
 
 <div class="modal fade" id="modal-cliente" tabindex="-1" data-backdrop="static" role="dialog" aria-labelledby="modalClienteLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <form id="form-cliente">
-            @csrf
+            <input type="hidden" name="_token" value="{{ csrf_token() }}" class="exclude-reset">
             <input type="hidden" name="cliente_id" id="cliente_id">
             <div class="modal-content">
                 <div class="modal-header">
@@ -13,50 +45,54 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-
                 <div class="modal-body">
-                    <!-- Pestañas con íconos -->
+                    <!-- Pestañas horizontales -->
                     <ul class="nav nav-tabs mb-3" id="clienteTabs" role="tablist">
                         <li class="nav-item">
-                            <a class="nav-link active" data-toggle="tab" href="#tab-general">
+                            <a class="nav-link active" id="tab-general-tab" data-toggle="tab" href="#tab-general" role="tab">
                                 <i class="fas fa-user me-1"></i> General
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#tab-financieros">
+                            <a class="nav-link" id="tab-financieros-tab" data-toggle="tab" href="#tab-financieros" role="tab">
                                 <i class="fas fa-dollar-sign me-1"></i> Financiero
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#tab-tributarios">
+                            <a class="nav-link" id="tab-contable-tab" data-toggle="tab" href="#tab-contable" role="tab">
+                                <i class="fas fa-calculator me-1"></i> Contable
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="tab-tributarios-tab" data-toggle="tab" href="#tab-tributarios" role="tab">
                                 <i class="fas fa-file-invoice me-1"></i> Tributario
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#tab-comercial">
+                            <a class="nav-link" id="tab-comercial-tab" data-toggle="tab" href="#tab-comercial" role="tab">
                                 <i class="fas fa-briefcase me-1"></i> Comercial
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#tab-documentos">
+                            <a class="nav-link" id="tab-documentos-tab" data-toggle="tab" href="#tab-documentos" role="tab">
                                 <i class="fas fa-folder-open me-1"></i> Documentos
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#tab-kpi">
+                            <a class="nav-link" id="tab-kpi-tab" data-toggle="tab" href="#tab-kpi" role="tab">
                                 <i class="fas fa-chart-line me-1"></i> KPIs
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#tab-configuracion">
+                            <a class="nav-link" id="tab-configuracion-tab" data-toggle="tab" href="#tab-configuracion" role="tab">
                                 <i class="fas fa-cogs me-1"></i> Configuración
                             </a>
                         </li>
                     </ul>
-
                     <div class="tab-content">
                         @include('empresa.clientes.tabs.general')
                         @include('empresa.clientes.tabs.financieros')
+                        @include('empresa.clientes.tabs.contables')
                         @include('empresa.clientes.tabs.tributarios')
                         @include('empresa.clientes.tabs.comercial')
                         @include('empresa.clientes.tabs.documentos')
@@ -64,7 +100,6 @@
                         @include('empresa.clientes.tabs.configuracion')
                     </div>
                 </div>
-
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">Guardar</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
@@ -73,7 +108,6 @@
         </form>
     </div>
 </div>
-
 
 @push('js')
 <script>
@@ -134,7 +168,7 @@
         const esRucValido = tipo_identificacion === '04' && numero_identificacion.length === 13;
 
         if (esCedulaValida || esRucValido) {
-            $.get('{{ route("clientes.buscarPorIdentificacion") }}', { numero_identificacion }, function (data) {
+            $.get('{{ route("personas.buscarPorIdentificacion") }}', { numero_identificacion }, function (data) {
                 if (data.encontrado) {
                     const p = data.persona;
                     $('#nombre').val(p.nombre ?? '');
@@ -205,11 +239,15 @@
     });
 
     // Guardar o editar cliente
+// Guardar o editar cliente
 $('#form-cliente').on('submit', function (e) {
     e.preventDefault();
+
     const id = $('#cliente_id').val();
-    const url = id ? `/empresa/clientes/${id}` : '{{ route("clientes.store") }}';
-    const method = id ? 'POST' : 'POST'; // Laravel no acepta PUT con FormData directamente
+    const url = id
+        ? `/empresa/clientes/${id}`
+        : '{{ route("clientes.store") }}';
+    const method = id ? 'POST' : 'POST'; // Laravel no acepta PUT directamente con FormData
 
     const formData = new FormData(this);
     if (id) {
@@ -223,36 +261,62 @@ $('#form-cliente').on('submit', function (e) {
         contentType: false,
         processData: false,
         success: function (response) {
-            $('#modal-cliente').modal('hide');
-            Swal.fire({
-                icon: 'success',
-                title: response.message,
-                toast: true,
-                timer: 1500,
-                position: 'top-end',
-                showConfirmButton: false
-            });
+    $('#modal-cliente').modal('hide');
 
-            $('#tabla-clientes').DataTable().ajax.reload(null, false);
-        },
+    $('#modal-cliente').one('hidden.bs.modal', function () {
+        $('#form-cliente')[0].reset();
+        $('#form-cliente').find('input:hidden').not('.exclude-reset').val('');
+        $('#form-cliente').find('select').val(null).trigger('change');
+        $('#form-cliente').find('input:checkbox').prop('checked', false);
+        $('#form-cliente').find('.is-invalid').removeClass('is-invalid');
+        $('#form-cliente').find('.error-message').remove();
+        $('#clienteTabs a:first').tab('show');
+    });
+
+    Swal.fire({
+        icon: 'success',
+        title: response.message || 'Cliente registrado correctamente.',
+        toast: true,
+        timer: 1500,
+        position: 'top-end',
+        showConfirmButton: false
+    });
+
+    $('#tabla-clientes').DataTable().ajax.reload(null, false);
+},
+
         error: function (xhr) {
             if (xhr.status === 422) {
-                const errors = xhr.responseJSON.errors;
-                let messages = '';
-                Object.keys(errors).forEach(key => {
-                    messages += `<li>${errors[key][0]}</li>`;
-                });
+                if (xhr.responseJSON?.errors) {
+                    const errors = xhr.responseJSON.errors;
+                    let messages = '';
+                    Object.keys(errors).forEach(key => {
+                        messages += `<li>${errors[key][0]}</li>`;
+                    });
 
-                Swal.fire({
-                    icon: 'error',
-                    html: `<ul class="text-left">${messages}</ul>`,
-                    title: 'Errores de validación',
-                });
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Errores de validación',
+                        html: `<ul class="text-left">${messages}</ul>`,
+                    });
+                } else if (xhr.responseJSON?.message) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: xhr.responseJSON.message,
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Ocurrió un error inesperado.'
+                    });
+                }
             } else {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: xhr.responseJSON?.message || 'Ocurrió un error inesperado'
+                    text: xhr.responseJSON?.message || 'Ocurrió un error inesperado.'
                 });
             }
         }
@@ -272,6 +336,7 @@ $(document).on('click', '.editar-cliente', function () {
         $('#tipo_identificacion').val(res.tipo_identificacion).trigger('change');
         $('#numero_identificacion').val(res.numero_identificacion);
         $('#nombre').val(res.nombre);
+        $('#nombre_comercial').val(res.nombre_comercial);
         $('#telefono').val(res.telefono);
         $('#email').val(res.email);
         $('#direccion').val(res.direccion);
@@ -284,13 +349,12 @@ $(document).on('click', '.editar-cliente', function () {
         $('#codigo_interno').val(datos.codigo_interno ?? '');
         $('#categoria_cliente').val(datos.categoria_cliente ?? '');
         $('#segmento').val(datos.segmento ?? '');
-        $('#fecha_registro').val(datos.fecha_registro ?? '');
         $('#vendedor_asignado').val(datos.vendedor_asignado ?? '').trigger('change');
         $('#lista_precios').val(datos.lista_precios ?? '').trigger('change');
         $('#canal_venta').val(datos.canal_venta ?? '');
         $('#zona').val(datos.zona ?? '');
         $('#clasificacion').val(datos.clasificacion ?? '');
-        $('#inicio_relacion').val(datos.inicio_relacion ?? '');
+        $('#inicio_relacion').val(datos.inicio_relacion_formatted ?? '');
 
         // Configuración
         $('#notas').val(datos.configuracion?.notas ?? '');
@@ -308,6 +372,7 @@ $(document).on('click', '.editar-cliente', function () {
         $('#agente_retencion').prop('checked', datos.tributarios?.agente_retencion ?? false);
         $('#contribuyente_especial').prop('checked', datos.tributarios?.contribuyente_especial ?? false);
         $('#obligado_contabilidad').prop('checked', datos.tributarios?.obligado_contabilidad ?? false);
+        $('#parte_relacionada').prop('checked', datos.tributarios?.parte_relacionada ?? false);
         $('#regimen_tributario').val(datos.tributarios?.regimen_tributario ?? '');
         $('#retencion_fuente').val(datos.tributarios?.retencion_fuente ?? '');
         $('#retencion_iva').val(datos.tributarios?.retencion_iva ?? '');
@@ -319,6 +384,15 @@ $(document).on('click', '.editar-cliente', function () {
         $('#dias_promedio_pago').val(datos.kpi?.dias_promedio_pago ?? '');
         $('#saldo_por_cobrar').val(datos.kpi?.saldo_por_cobrar ?? '');
         $('#promedio_mensual').val(datos.kpi?.promedio_mensual ?? '');
+
+        // Contables
+        $('#cta_contable_cliente').val(datos.contables?.cta_contable_cliente ?? '');
+        $('#cta_anticipos_cliente').val(datos.contables?.cta_anticipos_cliente ?? '');
+        $('#cta_ingresos_diferidos').val(datos.contables?.cta_ingresos_diferidos ?? '');
+        $('#centro_costo').val(datos.contables?.centro_costo ?? '');
+        $('#proyecto').val(datos.contables?.proyecto ?? '');
+        $('#segmento_contable').val(datos.contables?.segmento_contable ?? '');
+        $('#indicador_contab_separada').val(datos.contables?.indicador_contab_separada ?? '');
 
         // Documentos
         const documentos = datos.documentos ?? [];
@@ -346,8 +420,6 @@ $(document).on('click', '.editar-cliente', function () {
         Swal.fire('Error', 'No se pudo cargar el cliente', 'error');
     });
 });
-
-
 
     // Eliminar cliente
     $(document).on('click', '.eliminar-cliente', function () {

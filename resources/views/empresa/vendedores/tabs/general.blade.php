@@ -5,7 +5,7 @@
                 @include('components.select', [
                     'nombre' => 'tipo_identificacion',
                     'label' => 'Tipo Identificación',
-                    'opciones' => ['04' => 'RUC', '05' => 'Cédula', '06' => 'Pasaporte', '07' => 'Consumidor final', '08' => 'Exterior'],
+                    'opciones' => ['04' => 'RUC', '05' => 'Cédula', '06' => 'Pasaporte'],
                     'col' => 'col-md-4', 'mostrarPrimeraOpcion' => false
                 ])
 

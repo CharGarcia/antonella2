@@ -59,7 +59,7 @@
                         <label for="user_id">Usuario</label>
                         <select name="user_id" id="user_id" class="form-control" required>
                         @foreach(
-                            \App\Models\User::where('status', true)
+                            \App\Models\Admin\User::where('status', true)
                                 ->whereIn('id', \DB::table('usuario_asignado')
                                     ->where('id_admin', auth()->id())
                                     ->pluck('id_user'))
@@ -74,7 +74,7 @@
                         <label for="establecimiento_id">Establecimiento</label>
                         <select name="establecimiento_id" id="establecimiento_id" class="form-control" required>
                         @foreach(
-                            \App\Models\Establecimiento::whereIn('id', function ($query) {
+                            \App\Models\Empresa\Establecimiento::whereIn('id', function ($query) {
                                 $query->select('establecimiento_id')
                                     ->from('establecimiento_usuario')
                                     ->where('user_id', auth()->id());

@@ -5,7 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
-use App\Models\SubmenuEstablecimientoUsuario;
+use App\Models\Admin\SubmenuEstablecimientoUsuario;
 
 class VerificarPermisosSubmenu
 {
@@ -27,11 +27,11 @@ class VerificarPermisosSubmenu
         }
 
         // Buscar el nombre del submenú para mostrarlo en el mensaje
-        $submenu = \App\Models\Submenu::find($submenuId);
+        $submenu = \App\Models\Admin\Submenu::find($submenuId);
         $nombreSubmenu = $submenu?->nombre ?? 'este módulo';
 
         // Obtener los permisos del usuario en ese establecimiento y submenú
-        $permisos = \App\Models\SubmenuEstablecimientoUsuario::where('user_id', $user->id)
+        $permisos = \App\Models\Admin\SubmenuEstablecimientoUsuario::where('user_id', $user->id)
             ->where('establecimiento_id', $establecimientoId)
             ->where('submenu_id', $submenuId)
             ->first();

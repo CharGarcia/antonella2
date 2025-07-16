@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Yajra\DataTables\Facades\DataTables;
-use App\Models\Persona;
+use App\Models\Empresa\Personas\Persona;
+use Illuminate\Support\Carbon;
 
 
 class VendedorController extends Controller
@@ -26,7 +27,7 @@ class VendedorController extends Controller
         $establecimientoId = session('establecimiento_id');
         $submenuId = session('submenu_id');
 
-        $permisos = \App\Models\SubmenuEstablecimientoUsuario::where('user_id', $user->id)
+        $permisos = \App\Models\Admin\SubmenuEstablecimientoUsuario::where('user_id', $user->id)
             ->where('establecimiento_id', $establecimientoId)
             ->where('submenu_id', $submenuId)
             ->first();
@@ -110,18 +111,6 @@ class VendedorController extends Controller
         return response()->json(['message' => 'Vendedor eliminado']);
     }
 
-    public function buscarPorIdentificacion(Request $request)
-    {
-        $numero = trim($request->numero_identificacion);
-
-        $persona = Persona::where('numero_identificacion', $numero)->first();
-
-        return response()->json([
-            'encontrado' => (bool) $persona,
-            'persona' => $persona
-        ]);
-    }
-
     public function store(Request $request)
     {
         $messages = [
@@ -129,6 +118,8 @@ class VendedorController extends Controller
             'numero_identificacion.required' => 'El número de identificación es obligatorio.',
             'nombre.required' => 'El nombre del vendedor es obligatorio.',
             'email.required' => 'El campo email es obligatorio.',
+            'estado.in' => 'El estado debe ser activo o inactivo.',
+            'monto_ventas_asignado.min' => 'El monto de ventas asignado no puede ser negativo.',
         ];
 
         $validator = Validator::make($request->all(), [
@@ -149,14 +140,22 @@ class VendedorController extends Controller
             // datos_vendedor
             'codigo_interno' => 'nullable|string',
             'perfil' => 'nullable|string',
-            'fecha_registro' => 'nullable|date',
-            'vendedor_asignado' => 'nullable|string',
+            'fecha_registro' => 'nullable|date_format:d/m/Y',
             'zona' => 'nullable|string',
-            'inicio_relacion' => 'nullable|date',
+            'inicio_relacion' => 'nullable|date_format:d/m/Y',
             'estado' => 'required|in:activo,inactivo',
             'informacion_adicional' => 'nullable|string',
-            'monto_ventas_asignado'  => 'nullable|numeric|min:0',
+            'monto_ventas_asignado' => 'nullable|numeric|min:0',
         ], $messages);
+
+        $validator->after(function ($v) use ($request) {
+            $emails = array_filter(array_map('trim', explode(',', $request->input('email') ?? '')));
+            foreach ($emails as $email) {
+                if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    $v->errors()->add('email', "El correo \"$email\" no es válido.");
+                }
+            }
+        });
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
@@ -164,25 +163,61 @@ class VendedorController extends Controller
 
         $data = $validator->validated();
 
-        DB::transaction(function () use ($data, $request) {
-            $data['email'] = implode(',', array_map('strtolower', array_map('trim', explode(',', $data['email']))));
+        // ✅ Conversión de fechas
+        if (!empty($data['fecha_registro'])) {
+            $data['fecha_registro'] = Carbon::createFromFormat('d/m/Y', $data['fecha_registro'])
+                ->format('Y-m-d');
+        }
 
+        if (!empty($data['inicio_relacion'])) {
+            $data['inicio_relacion'] = Carbon::createFromFormat('d/m/Y', $data['inicio_relacion'])
+                ->format('Y-m-d');
+        }
+
+        DB::transaction(function () use ($data, $request) {
+
+            // ✅ Normalizar emails
+            $data['email'] = !empty($data['email'])
+                ? implode(',', array_map('strtolower', array_map('trim', explode(',', $data['email']))))
+                : null;
+
+            // ✅ Limpiar y pasar a mayúsculas campos string
             foreach (['nombre', 'direccion', 'provincia', 'ciudad', 'pais', 'nombre_comercial'] as $campo) {
                 if (!empty($data[$campo])) {
                     $data[$campo] = strtoupper(preg_replace('/\s+/', ' ', trim($data[$campo])));
                 }
             }
 
-            $persona = Persona::create(array_merge(
-                $data,
-                [
-                    'id_user' => Auth::id(),
-                    'id_establecimiento' => session('establecimiento_id'),
-                    'tipo' => ['vendedor']
-                ]
-            ));
+            // ✅ Buscar persona existente
+            $persona = \App\Models\Empresa\Personas\Persona::where('numero_identificacion', trim($data['numero_identificacion']))
+                ->where('id_establecimiento', session('establecimiento_id'))
+                ->first();
 
-            $vendedor = $persona->datosVendedor()->create([
+            if ($persona) {
+                // ✅ Verificar si ya es vendedor
+                if (in_array('vendedor', $persona->tipo)) {
+                    throw new \Exception('El vendedor ya se encuentra registrado.');
+                }
+
+                // ✅ Agregar tipo vendedor a la persona existente
+                $tipos = $persona->tipo;
+                $tipos[] = 'vendedor';
+                $persona->tipo = array_unique($tipos);
+                $persona->fill($data)->save();
+            } else {
+                // ✅ Crear nueva persona si no existe
+                $persona = \App\Models\Empresa\Personas\Persona::create(array_merge(
+                    $data,
+                    [
+                        'id_user' => Auth::id(),
+                        'id_establecimiento' => session('establecimiento_id'),
+                        'tipo' => ['vendedor']
+                    ]
+                ));
+            }
+
+            // ✅ Crear datos de vendedor
+            $persona->datosVendedor()->create([
                 'codigo_interno' => $data['codigo_interno'] ?? null,
                 'perfil' => $data['perfil'] ?? null,
                 'fecha_registro' => $data['fecha_registro'] ?? null,
@@ -190,27 +225,37 @@ class VendedorController extends Controller
                 'inicio_relacion' => $data['inicio_relacion'] ?? null,
                 'estado' => $data['estado'],
                 'informacion_adicional' => $data['informacion_adicional'] ?? null,
-                'monto_ventas_asignado'  => $data['monto_ventas_asignado']  ?? 0,
+                'monto_ventas_asignado' => $data['monto_ventas_asignado'] ?? 0,
             ]);
         });
 
         return response()->json(['message' => 'Vendedor registrado correctamente.']);
     }
 
-
     public function update(Request $request, $id)
     {
-        $persona = Persona::findOrFail($id);
+        $persona = \App\Models\Empresa\Personas\Persona::findOrFail($id);
+
+        $messages = [
+            'tipo_identificacion.required' => 'El tipo de identificación es obligatorio.',
+            'numero_identificacion.required' => 'El número de identificación es obligatorio.',
+            'nombre.required' => 'El nombre del vendedor es obligatorio.',
+            'email.required' => 'El campo email es obligatorio.',
+            'estado.in' => 'El estado debe ser activo o inactivo.',
+            'monto_ventas_asignado.min' => 'El monto de ventas asignado no puede ser negativo.',
+        ];
 
         $validator = Validator::make($request->all(), [
             'tipo_identificacion' => 'required|string',
             'numero_identificacion' => [
                 'required',
                 'string',
-                Rule::unique('personas')->ignore($persona->id)->where(
-                    fn($query) => $query->where('id_establecimiento', session('establecimiento_id'))
-                        ->whereJsonContains('tipo', 'vendedor')
-                ),
+                Rule::unique('personas')
+                    ->ignore($persona->id)
+                    ->where(function ($query) {
+                        $query->where('id_establecimiento', session('establecimiento_id'))
+                            ->whereJsonContains('tipo', 'vendedor');
+                    }),
             ],
             'nombre' => 'required|string|max:255',
             'telefono' => 'nullable|string|max:20',
@@ -228,15 +273,15 @@ class VendedorController extends Controller
             // datos_vendedor
             'codigo_interno' => 'nullable|string',
             'perfil' => 'nullable|string',
-            'fecha_registro' => 'nullable|date',
+            'fecha_registro' => 'nullable|date_format:d/m/Y',
             'zona' => 'nullable|string',
-            'inicio_relacion' => 'nullable|date',
+            'inicio_relacion' => 'nullable|date_format:d/m/Y',
             'informacion_adicional' => 'nullable|string',
-            'monto_ventas_asignado'  => 'nullable|numeric|min:0',
-        ]);
+            'monto_ventas_asignado' => 'nullable|numeric|min:0',
+        ], $messages);
 
         $validator->after(function ($v) use ($request) {
-            $emails = array_map('trim', explode(',', $request->input('email')));
+            $emails = array_filter(array_map('trim', explode(',', $request->input('email') ?? '')));
             foreach ($emails as $email) {
                 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     $v->errors()->add('email', "El correo \"$email\" no es válido.");
@@ -250,22 +295,53 @@ class VendedorController extends Controller
 
         $data = $validator->validated();
 
+        // ✅ Conversión de fechas a Y-m-d
+        if (!empty($data['fecha_registro'])) {
+            $data['fecha_registro'] = Carbon::createFromFormat('d/m/Y', $data['fecha_registro'])
+                ->format('Y-m-d');
+        }
+
+        if (!empty($data['inicio_relacion'])) {
+            $data['inicio_relacion'] = Carbon::createFromFormat('d/m/Y', $data['inicio_relacion'])
+                ->format('Y-m-d');
+        }
+
+        // ✅ Validar duplicados
+        $personaDuplicada = \App\Models\Empresa\Personas\Persona::where('numero_identificacion', trim($data['numero_identificacion']))
+            ->where('id_establecimiento', session('establecimiento_id'))
+            ->whereJsonContains('tipo', 'vendedor')
+            ->where('id', '!=', $persona->id)
+            ->first();
+
+        if ($personaDuplicada) {
+            return response()->json([
+                'message' => 'El vendedor ya se encuentra registrado.',
+            ], 422);
+        }
+
+        // ✅ Formateo
         foreach (['nombre', 'direccion', 'provincia', 'ciudad', 'pais', 'nombre_comercial'] as $campo) {
             if (!empty($data[$campo])) {
                 $data[$campo] = strtoupper(preg_replace('/\s+/', ' ', trim($data[$campo])));
             }
         }
 
-        $data['email'] = implode(',', array_map('strtolower', array_map('trim', explode(',', $data['email']))));
+        $data['email'] = !empty($data['email'])
+            ? implode(',', array_map('strtolower', array_map('trim', explode(',', $data['email']))))
+            : null;
 
         $tipos = $persona->tipo ?? [];
+
         if (!in_array('vendedor', $tipos)) {
             $tipos[] = 'vendedor';
         }
-        $persona->tipo = $tipos;
+
+        $persona->tipo = array_unique($tipos);
         $persona->fill($data)->save();
 
+        // ✅ Actualizar o crear datos vendedor
         $datosVendedor = $persona->datosVendedor;
+
         if ($datosVendedor) {
             $datosVendedor->update([
                 'codigo_interno' => $data['codigo_interno'] ?? null,
@@ -275,12 +351,24 @@ class VendedorController extends Controller
                 'inicio_relacion' => $data['inicio_relacion'] ?? null,
                 'estado' => $data['estado'],
                 'informacion_adicional' => $data['informacion_adicional'] ?? null,
-                'monto_ventas_asignado'  => $data['monto_ventas_asignado'] ?? 0,
+                'monto_ventas_asignado' => $data['monto_ventas_asignado'] ?? 0,
+            ]);
+        } else {
+            $persona->datosVendedor()->create([
+                'codigo_interno' => $data['codigo_interno'] ?? null,
+                'perfil' => $data['perfil'] ?? null,
+                'fecha_registro' => $data['fecha_registro'] ?? null,
+                'zona' => $data['zona'] ?? null,
+                'inicio_relacion' => $data['inicio_relacion'] ?? null,
+                'estado' => $data['estado'],
+                'informacion_adicional' => $data['informacion_adicional'] ?? null,
+                'monto_ventas_asignado' => $data['monto_ventas_asignado'] ?? 0,
             ]);
         }
 
         return response()->json(['message' => 'Vendedor actualizado correctamente.']);
     }
+
 
     public function edit(Persona $vendedor)
     {

@@ -5,7 +5,7 @@ namespace App\Http\ViewComposers;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use App\Models\SubmenuEstablecimientoUsuario;
+use App\Models\Admin\SubmenuEstablecimientoUsuario;
 
 class PermisosComposer
 {

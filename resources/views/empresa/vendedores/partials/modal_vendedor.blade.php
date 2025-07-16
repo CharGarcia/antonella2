@@ -4,7 +4,7 @@
 <div class="modal fade" id="modal-vendedor" tabindex="-1" data-backdrop="static" role="dialog" aria-labelledby="modalClienteLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <form id="form-vendedor">
-            @csrf
+            <input type="hidden" name="_token" value="{{ csrf_token() }}" class="exclude-reset">
             <input type="hidden" name="vendedor_id" id="vendedor_id">
             <div class="modal-content">
                 <div class="modal-header">
@@ -96,7 +96,7 @@
         const esRucValido = tipo_identificacion === '04' && numero_identificacion.length === 13;
 
         if (esCedulaValida || esRucValido) {
-            $.get('{{ route("vendedores.buscarPorIdentificacion") }}', { numero_identificacion }, function (data) {
+            $.get('{{ route("personas.buscarPorIdentificacion") }}', { numero_identificacion }, function (data) {
                 if (data.encontrado) {
                     const p = data.persona;
                     $('#nombre').val(p.nombre ?? '');
@@ -169,13 +169,17 @@
     // Guardar o editar vendedor
 $('#form-vendedor').on('submit', function (e) {
     e.preventDefault();
+
     const id = $('#vendedor_id').val();
-    const url = id ? `/empresa/vendedores/${id}` : '{{ route("vendedores.store") }}';
-    const method = id ? 'POST' : 'POST'; // Laravel no acepta PUT con FormData directamente
+    const url = id
+        ? `/empresa/vendedores/${id}`
+        : '{{ route("vendedores.store") }}';
+
+    const method = 'POST'; // Laravel no acepta PUT con FormData directamente
 
     const formData = new FormData(this);
     if (id) {
-        formData.append('_method', 'PUT'); // Spoofing method for Laravel
+        formData.append('_method', 'PUT');
     }
 
     $.ajax({
@@ -186,40 +190,67 @@ $('#form-vendedor').on('submit', function (e) {
         processData: false,
         success: function (response) {
             $('#modal-vendedor').modal('hide');
+
             Swal.fire({
                 icon: 'success',
-                title: response.message,
+                title: response.message || 'Vendedor guardado correctamente.',
                 toast: true,
                 timer: 1500,
                 position: 'top-end',
                 showConfirmButton: false
             });
 
+            // ✅ Limpiar el formulario
+            const form = $('#form-vendedor')[0];
+            form.reset();
+            $('#form-vendedor').find('input[type=hidden]').not('[name="_token"]').val('');
+            $('#form-vendedor').find('input:checkbox').prop('checked', false);
+            $('#form-vendedor').find('select').val('').trigger('change');
+            $('#form-vendedor').find('.is-invalid').removeClass('is-invalid');
+            $('#form-vendedor').find('.error-message').remove();
+
             $('#tabla-vendedores').DataTable().ajax.reload(null, false);
         },
         error: function (xhr) {
             if (xhr.status === 422) {
-                const errors = xhr.responseJSON.errors;
-                let messages = '';
-                Object.keys(errors).forEach(key => {
-                    messages += `<li>${errors[key][0]}</li>`;
-                });
+                // Errores de validación
+                if (xhr.responseJSON?.errors) {
+                    const errors = xhr.responseJSON.errors;
+                    let messages = '';
+                    Object.keys(errors).forEach(key => {
+                        messages += `<li>${errors[key][0]}</li>`;
+                    });
 
-                Swal.fire({
-                    icon: 'error',
-                    html: `<ul class="text-left">${messages}</ul>`,
-                    title: 'Errores de validación',
-                });
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Errores de validación',
+                        html: `<ul class="text-left">${messages}</ul>`,
+                    });
+                } else if (xhr.responseJSON?.message) {
+                    // Error general enviado como message
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: xhr.responseJSON.message,
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Ocurrió un error inesperado.',
+                    });
+                }
             } else {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: xhr.responseJSON?.message || 'Ocurrió un error inesperado'
+                    text: xhr.responseJSON?.message || 'Ocurrió un error inesperado.',
                 });
             }
         }
     });
 });
+
 
 
     // Cargar vendedor en edición

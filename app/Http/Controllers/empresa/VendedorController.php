@@ -372,10 +372,8 @@ class VendedorController extends Controller
 
     public function edit(Persona $vendedor)
     {
-        $vendedor->load([
-            'datosVendedor',
-        ]);
-
+        $vendedor->load('datosVendedor');
+        $vendedor->datosVendedor?->append('inicio_relacion_formatted');
         return response()->json($vendedor);
     }
 }

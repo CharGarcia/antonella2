@@ -48,11 +48,14 @@
                                     <li class="nav-item">
                                         @if(Route::has($ruta))
                                             <a href="{{ route($ruta) }}"
-                                            class="nav-link submenu-link border border-primary rounded px-3 py-1 mb-1
-                                                {{ request()->routeIs($ruta) ? 'active bg-primary text-white' : 'text-primary bg-white' }}"
-                                            data-submenu-id="{{ $submenu->id }}">
-                                                <i class="{{ $submenu->icono ?? 'far fa-circle' }} nav-icon me-2
-                                                {{ request()->routeIs($ruta) ? 'text-white' : 'text-primary' }}"></i>
+                                                class="nav-link submenu-link rounded mb-1
+                                                    {{ request()->routeIs($ruta) ? 'bg-primary text-white' : 'bg-light text-secondary' }}"
+                                                style="font-size: 0.90rem; padding: 4px 8px; max-width: 200px; border: 1px solid #dee2e6;"
+                                                data-submenu-id="{{ $submenu->id }}">
+                                                <i class="{{ $submenu->icono ?? 'far fa-circle' }} nav-icon me-2"
+                                                    style="font-size: 0.75rem;
+                                                    {{ request()->routeIs($ruta) ? 'color: white;' : 'color: #6c757d;' }}">
+                                                </i>
                                                 <p class="mb-0">{{ $submenu->nombre }}</p>
                                             </a>
                                         @else

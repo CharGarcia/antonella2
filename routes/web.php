@@ -17,6 +17,7 @@ use App\Http\Controllers\Auth\RegistroController;
 use App\Http\Controllers\Admin\UsuarioAsignadoController;
 use App\Http\Controllers\empresa\ClienteController;
 use App\Http\Controllers\Empresa\VendedorController;
+use App\Http\Controllers\Empresa\CompradorController;
 use App\Http\Controllers\empresa\ProveedorController;
 use App\Http\Controllers\Empresa\PersonaController;
 
@@ -54,6 +55,23 @@ Route::middleware(['auth'])
     });
 
 
+//para compradores
+//permiso admin user: gestionar-compradores
+//ruta para submenus: compradores.compradores
+Route::middleware(['auth', 'verificar.permisos.submenu', 'can:gestionar-compradores'])
+    ->prefix('empresa/compradores')
+    ->name('compradores.')
+    ->group(function () {
+        Route::get('/', [CompradorController::class, 'index'])->name('compradores');
+        Route::get('/data', [CompradorController::class, 'getData'])->name('data');
+        Route::get('/crear', [CompradorController::class, 'create'])->name('create');
+        Route::post('/', [CompradorController::class, 'store'])->name('store');
+        Route::get('/{comprador}/edit', [CompradorController::class, 'edit'])->name('edit');
+        Route::put('/{comprador}', [CompradorController::class, 'update'])->name('update');
+        Route::delete('/{comprador}', [CompradorController::class, 'destroy'])->name('destroy');
+    });
+
+
 //para vendedores
 //permiso admin user: gestionar-vendedores
 //ruta para submenus: vendedores.vendedores
@@ -68,7 +86,6 @@ Route::middleware(['auth', 'verificar.permisos.submenu', 'can:gestionar-vendedor
         Route::get('/{vendedor}/edit', [VendedorController::class, 'edit'])->name('edit');
         Route::put('/{vendedor}', [VendedorController::class, 'update'])->name('update');
         Route::delete('/{vendedor}', [VendedorController::class, 'destroy'])->name('destroy');
-        //Route::get('/buscar-identificacion', [VendedorController::class, 'buscarPorIdentificacion'])->name('buscarPorIdentificacion');
     });
 
 
@@ -87,7 +104,6 @@ Route::middleware(['auth', 'verificar.permisos.submenu', 'can:gestionar-clientes
         Route::get('/{cliente}/edit', [ClienteController::class, 'edit'])->name('edit');
         Route::put('/{cliente}', [ClienteController::class, 'update'])->name('update');
         Route::delete('/{cliente}', [ClienteController::class, 'destroy'])->name('destroy');
-        //Route::get('/buscar-identificacion', [ClienteController::class, 'buscarPorIdentificacion'])->name('buscarPorIdentificacion');
         Route::delete('/documentos/{documento}', [ClienteController::class, 'eliminarDocumento'])->name('documentos.eliminar');
     });
 
@@ -106,7 +122,6 @@ Route::middleware(['auth', 'verificar.permisos.submenu', 'can:gestionar-proveedo
         Route::get('/{proveedor}/edit', [ProveedorController::class, 'edit'])->name('edit');
         Route::put('/{proveedor}', [ProveedorController::class, 'update'])->name('update');
         Route::delete('/{proveedor}', [ProveedorController::class, 'destroy'])->name('destroy');
-        //Route::get('/buscar-identificacion', [ProveedorController::class, 'buscarPorIdentificacion'])->name('buscarPorIdentificacion');
         Route::delete('/documentos/{documento}', [ProveedorController::class, 'eliminarDocumento'])->name('documentos.eliminar');
     });
 

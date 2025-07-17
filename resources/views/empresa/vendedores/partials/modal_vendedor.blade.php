@@ -81,6 +81,9 @@
         $('#form-vendedor').find('select.select2').val('').trigger('change');
         $('#vendedor_id').val('');
         $('#modalVendedorLabel').html('<i class="fas fa-clipboard-check text-success mr-2"></i> Nuevo Vendedor');
+        const hoy = new Date();
+        const fecha = hoy.toLocaleDateString('es-EC').split('/').map(d => d.padStart(2, '0')).join('/');
+        $('#inicio_relacion').val(fecha);
         $('#modal-vendedor').modal('show');
     });
 
@@ -278,7 +281,7 @@ $(document).on('click', '.editar-vendedor', function () {
         $('#perfil').val(datos.perfil ?? '');
         $('#fecha_registro').val(datos.fecha_registro ?? '');
         $('#zona').val(datos.zona ?? '');
-        $('#inicio_relacion').val(datos.inicio_relacion ?? '');
+        $('#inicio_relacion').val(datos.inicio_relacion_formatted ?? '');
         $('#informacion_adicional').val(datos.informacion_adicional ?? '');
         $('#monto_ventas_asignado').val(datos.monto_ventas_asignado ?? '');
 

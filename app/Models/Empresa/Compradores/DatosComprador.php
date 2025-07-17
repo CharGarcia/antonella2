@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Models\Empresa\Vendedores;
+namespace App\Models\Empresa\Compradores;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Empresa\Personas\Persona;
 
-class DatosVendedor extends Model
+class DatosComprador extends Model
 {
-    protected $table = 'datos_vendedores';
+    protected $table = 'datos_compradores';
 
     protected $fillable = [
         'persona_id',
@@ -18,7 +18,9 @@ class DatosVendedor extends Model
         'inicio_relacion',
         'estado',
         'informacion_adicional',
-        'monto_ventas_asignado',
+        'pais',
+        'provincia',
+        'ciudad',
     ];
 
     protected $casts = [

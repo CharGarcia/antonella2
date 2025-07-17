@@ -8,7 +8,9 @@ use App\Models\Empresa\Establecimiento;
 use App\Models\Admin\User;
 use App\Models\Empresa\Clientes\DatosCliente;
 use App\Models\Empresa\Vendedores\DatosVendedor;
+use App\Models\Empresa\Compradores\DatosComprador;
 use App\Models\Empresa\Proveedores\DatosProveedor;
+
 
 class Persona extends Model
 {
@@ -76,5 +78,10 @@ class Persona extends Model
     public static function buscarPorIdentificacion($numero)
     {
         return self::where('numero_identificacion', trim($numero))->first();
+    }
+
+    public function datosComprador()
+    {
+        return $this->hasOne(DatosComprador::class, 'persona_id');
     }
 }

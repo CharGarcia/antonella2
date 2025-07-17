@@ -18,7 +18,7 @@
             'nombre' => 'inicio_relacion',
             'label' => 'Inicio de relación',
             'value' => now()->toDateString(),
-            'disabled' => true, 'col' => 'col-md-4'
+            'col' => 'col-md-4'
         ])
     </div>
 </div>

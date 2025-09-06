@@ -47,7 +47,7 @@
 
         @can('gestionar-usuarios')
             <a href="{{ route('usuarios.index') }}" class="btn btn-outline-primary d-flex align-items-center justify-content-start mb-2 w-100 text-nowrap">
-                <i class="fas fa-universal-access mr-2"></i> Gestión de usuarios
+                <i class="fas fa-universal-access mr-2"></i> Usuarios
             </a>
         @endcan
 

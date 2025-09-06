@@ -26,7 +26,7 @@ class FormasPagoSriController extends Controller
                 </button>';
             })
             ->editColumn('estado', function ($FormasPagoSri) {
-                return $FormasPagoSri->estado == 1
+                return $FormasPagoSri->estado == 'activo'
                     ? '<span class="badge badge-success"><i class="fas fa-check-circle"></i> Activa</span>'
                     : '<span class="badge badge-danger"><i class="fas fa-times-circle"></i> Inactiva</span>';
             })
@@ -39,7 +39,7 @@ class FormasPagoSriController extends Controller
         $request->validate([
             'codigo' => 'required|unique:formas_pago_sri,codigo',
             'descripcion' => 'required|string|max:50',
-            'estado' => 'required|boolean',
+            //'estado' => 'required|boolean',
         ]);
 
         FormasPagoSri::create($request->all());
@@ -56,7 +56,7 @@ class FormasPagoSriController extends Controller
         $request->validate([
             'codigo' => 'required|unique:formas_pago_sri,codigo,' . $formaPagoSri->id,
             'descripcion' => 'required|string|max:50',
-            'estado' => 'required|boolean',
+            //'estado' => 'required|boolean',
         ]);
 
         $formaPagoSri->update($request->all());

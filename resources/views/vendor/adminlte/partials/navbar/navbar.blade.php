@@ -23,7 +23,7 @@
                     <option value="">Seleccione establecimiento</option>
                     @foreach($establecimientos_disponibles as $est)
                         <option value="{{ $est->id }}" {{ session('establecimiento_id') == $est->id ? 'selected' : '' }}>
-                            {{ $est->nombre_comercial }}
+                            {{ $est->nombre_comercial }} {{ $est->serie }}
                         </option>
                     @endforeach
                 </select>

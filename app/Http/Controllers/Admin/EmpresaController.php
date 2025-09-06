@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\Empresa\Empresa;
+use App\Models\Admin\Empresa;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
@@ -61,10 +61,10 @@ class EmpresaController extends Controller
                 });
             })
             ->editColumn('estado', function ($empresas) {
-                if ($empresas->estado == 1) {
-                    return '<span class="badge badge-success"><i class="fas fa-check-circle"></i> Activo</span>';
+                if ($empresas->estado == 'activo') {
+                    return '<span class="badge badge-success"><i class="fas fa-check-circle"></i> Activa</span>';
                 } else {
-                    return '<span class="badge badge-danger"><i class="fas fa-times-circle"></i> Inactivo</span>';
+                    return '<span class="badge badge-danger"><i class="fas fa-times-circle"></i> Inactiva</span>';
                 }
             })
 
@@ -129,7 +129,7 @@ class EmpresaController extends Controller
     {
         $search = $request->input('q');
 
-        $empresas = Empresa::where('razon_social', 'like', '%' . $search . '%')
+        $empresas = Empresa::whereRaw("razon_social ILIKE ?", ["%{$search}%"])
             ->select('id', 'razon_social')
             ->limit(10)
             ->get();

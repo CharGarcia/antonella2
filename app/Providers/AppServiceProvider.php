@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Admin\Menu;
-use App\Models\Empresa\Establecimiento;
+use App\Models\Admin\Establecimiento;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -42,9 +42,9 @@ class AppServiceProvider extends ServiceProvider
             $establecimiento_id = session('establecimiento_id');
 
             // Menús filtrados por establecimiento si no es super_admin
-            $menus = Menu::where('activo', 1)
+            $menus = Menu::where('estado', 'activo')
                 ->with(['submenus' => function ($query) use ($user, $establecimiento_id) {
-                    $query->where('activo', 1)
+                    $query->where('estado', 'activo')
                         ->orderBy('orden');
 
                     if (!$user->roles->contains('name', 'super_admin') && $establecimiento_id) {

@@ -19,7 +19,7 @@
 
                 @if(Permisos::puedeRealizarAccion('crear', $permisos))
                     <button class="btn btn-success" id="btn-nuevo-vendedor">
-                        <i class="fas fa-plus"></i> Nuevo Vendedor
+                        <i class="fas fa-plus"></i> Nuevo
                     </button>
                 @endif
             </div>

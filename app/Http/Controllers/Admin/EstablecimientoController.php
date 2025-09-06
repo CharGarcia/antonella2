@@ -3,13 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use Illuminate\Support\Facades\Storage;
-use App\Models\Empresa\Establecimiento;
+use App\Models\Admin\Establecimiento;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Validation\Rule;
-use App\Models\Empresa\Productos\ListaPrecio;
-use Illuminate\Support\Facades\Auth;
+//use Illuminate\Support\Facades\Auth;
 
 class EstablecimientoController extends Controller
 {
@@ -26,14 +25,14 @@ class EstablecimientoController extends Controller
             ->addColumn('empresa_nombre', function ($establecimiento) {
                 return $establecimiento->empresa->razon_social ?? '';
             })
-            ->addColumn('logo_img', function ($establecimiento) {
+            /* ->addColumn('logo_img', function ($establecimiento) {
                 if ($establecimiento->logo) {
                     $url = asset('storage/logos_establecimientos/' . $establecimiento->logo);
                     return '<img src="' . $url . '" alt="Logo" style="height: 40px;">';
                 } else {
                     return '<span class="text-muted">Sin logo</span>';
                 }
-            })
+            }) */
             ->addColumn('acciones', function ($establecimiento) {
                 return '<div class="d-flex justify-content-center gap-1">
                             <button class="btn btn-warning btn-sm editar-establecimiento mr-2" data-id="' . $establecimiento->id . '" title="Editar">
@@ -42,11 +41,11 @@ class EstablecimientoController extends Controller
                         </div>';
             })
             ->editColumn('estado', function ($establecimiento) {
-                return $establecimiento->estado == 1
+                return $establecimiento->estado == 'activo'
                     ? '<span class="badge badge-success"><i class="fas fa-check-circle"></i> Activo</span>'
                     : '<span class="badge badge-danger"><i class="fas fa-times-circle"></i> Inactivo</span>';
             })
-            ->rawColumns(['acciones', 'estado', 'logo_img'])
+            ->rawColumns(['acciones', 'estado'])
             ->make(true);
     }
 
@@ -81,7 +80,7 @@ class EstablecimientoController extends Controller
             'consignacion_venta' => 'nullable|integer|min:1',
             'decimal_cantidad' => 'nullable|integer|min:0|max:6',
             'decimal_precio' => 'nullable|integer|min:0|max:6',
-            'estado' => 'required|in:0,1',
+            'estado' => 'required|in:activo,inactivo',
         ]);
 
         // Procesar el logo si viene
@@ -102,25 +101,6 @@ class EstablecimientoController extends Controller
 
         // Crear el establecimiento
         $establecimiento = Establecimiento::create($validated);
-
-        // Crear listas de precios asociadas
-        $listas = [
-            ['nombre' => 'Precio general', 'descripcion' => 'Lista estándar'],
-        ];
-
-        foreach ($listas as $item) {
-            ListaPrecio::firstOrCreate(
-                [
-                    'nombre' => $item['nombre'],
-                    'id_establecimiento' => $establecimiento->id,
-                ],
-                [
-                    'descripcion' => $item['descripcion'],
-                    'id_user' => Auth::id(),
-                    'estado' => true,
-                ]
-            );
-        }
 
         return response()->json([
             'success' => true,
@@ -164,7 +144,7 @@ class EstablecimientoController extends Controller
             'consignacion_venta' => 'nullable|integer|min:1',
             'decimal_cantidad' => 'nullable|integer|min:0|max:6',
             'decimal_precio' => 'nullable|integer|min:0|max:6',
-            'estado' => 'required|in:0,1',
+            'estado' => 'required|in:activo,inactivo',
         ]);
 
         // Procesar el logo si se ha cargado
@@ -183,25 +163,6 @@ class EstablecimientoController extends Controller
 
         // Actualizar el establecimiento con datos validados
         $establecimiento->update($validated);
-
-        // Asegurar que las listas de precios estén creadas
-        $listas = [
-            ['nombre' => 'Precio general', 'descripcion' => 'Lista estándar'],
-        ];
-
-        foreach ($listas as $item) {
-            \App\Models\Empresa\Productos\ListaPrecio::firstOrCreate(
-                [
-                    'nombre' => $item['nombre'],
-                    'id_establecimiento' => $establecimiento->id,
-                ],
-                [
-                    'descripcion' => $item['descripcion'],
-                    'id_user' => Auth::id(),
-                    'estado' => true,
-                ]
-            );
-        }
 
         return response()->json([
             'success' => true,

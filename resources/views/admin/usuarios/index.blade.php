@@ -7,6 +7,7 @@
 @stop
 
 @section('content')
+<meta name="csrf-token" content="{{ csrf_token() }}">
     <div class="card">
         <div class="card-body">
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
@@ -45,8 +46,8 @@
                         <th>
                             <select class="form-control form-control-sm">
                                 <option value="">Todos</option>
-                                <option value="1">Activo</option>
-                                <option value="0">Inactivo</option>
+                                <option value="activo">Activo</option>
+                                <option value="inactivo">Inactivo</option>
                             </select>
                         </th>
                      </tr>
@@ -55,7 +56,6 @@
         </div>
     </div>
     </div>
-
 @stop
 
 @section('js')
@@ -85,7 +85,7 @@ $(function () {
                             { data: 'email', name: 'email' },
                             { data: 'acciones', name: 'acciones', orderable: false, searchable: false },
                             { data: 'roles', name: 'roles.name', orderable: false, searchable: false},
-                            { data: 'status', name: 'status'},
+                            { data: 'estado', name: 'estado'},
             ],
             language: {
                url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json"
@@ -119,10 +119,37 @@ $(function () {
     });
 
 //para cambiar el status del usuario
-$(document).on('change', '.toggle-status', function () {
-    const checkbox = $(this);
-    const userId = checkbox.data('id');
-    const nuevoEstado = checkbox.is(':checked');
+// Utilidad: aplica color según el valor ("activo" | "inactivo")
+function applyEstadoColor($select) {
+    const val = ($select.val() || '').toLowerCase();
+    // Limpia clases previas
+    $select.removeClass('bg-success bg-danger text-white');
+
+    if (val === 'activo') {
+        $select.addClass('bg-success text-white');
+    } else if (val === 'inactivo') {
+        $select.addClass('bg-danger text-white');
+    }
+}
+
+// Inicializa colores en todos los selects (llámalo tras render de la tabla)
+function initEstadoColors(scope) {
+    const $scope = scope ? $(scope) : $(document);
+    $scope.find('select.select-estado').each(function () {
+        applyEstadoColor($(this));
+    });
+}
+
+// Al cambiar el select, enviamos AJAX y pintamos color
+$(document).on('change', '.select-estado', function () {
+    const $select = $(this);
+    const userId = $select.data('id');
+    const nuevoEstado = $select.val();                 // "activo" | "inactivo"
+    const anterior = $select.data('prev') || ($select.val() === 'activo' ? 'inactivo' : 'activo');
+    $select.data('prev', nuevoEstado);
+
+    // Pinta de inmediato (optimismo UX)
+    applyEstadoColor($select);
 
     $.ajax({
         url: '{{ route("usuarios.update-status") }}',
@@ -130,41 +157,60 @@ $(document).on('change', '.toggle-status', function () {
         data: {
             _token: $('meta[name="csrf-token"]').attr('content'),
             id: userId,
-            status: nuevoEstado ? 1 : 0
+            estado: nuevoEstado
         },
         success: function (res) {
-            Swal.fire({
-                icon: 'success',
-                title: res.message,
-                timer: 1500,
-                showConfirmButton: false
-            });
+            // Mensaje opcional
+            if (window.Swal && res?.message) {
+                Swal.fire({
+                    icon: 'success',
+                    title: res.message,
+                    timer: 1200,
+                    showConfirmButton: false
+                });
+            }
 
-            // Cambiar el texto del estado dinámicamente
-            const label = checkbox.closest('.form-check').siblings('.status-label');
-label.text(nuevoEstado ? 'Activo' : 'Inactivo');
-
-// Cambia color del texto dinámicamente
-label
-    .removeClass('text-success text-danger')
-    .addClass(nuevoEstado ? 'text-success' : 'text-danger');
-
+            // Actualiza label si existe cerca
+            const $label = $select.closest('td, .d-flex, .input-group').find('.estado-label');
+            if ($label.length) {
+                const esActivo = (nuevoEstado === 'activo');
+                $label
+                    .text(esActivo ? 'activo' : 'inactivo')
+                    .removeClass('text-success text-danger')
+                    .addClass(esActivo ? 'text-success' : 'text-danger');
+            }
         },
         error: function (xhr) {
-    if (xhr.status === 403) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Advertencia',
-            text: xhr.responseJSON.message,
-        });
-    } else {
-        Swal.fire('Error', 'No se pudo actualizar el estado', 'error');
-    }
+            // Revertir visualmente
+            $select.val(anterior);
+            applyEstadoColor($select);
 
-    checkbox.prop('checked', !nuevoEstado); // Revertir el cambio
-}
-
+            // Mensajes de error
+            if (xhr.status === 403 && xhr.responseJSON?.message) {
+                if (window.Swal) {
+                    Swal.fire({ icon: 'warning', title: 'Advertencia', text: xhr.responseJSON.message });
+                } else {
+                    alert(xhr.responseJSON.message);
+                }
+            } else {
+                if (window.Swal) {
+                    Swal.fire('Error', 'No se pudo actualizar el estado', 'error');
+                } else {
+                    alert('No se pudo actualizar el estado');
+                }
+            }
+        }
     });
+});
+
+// Si usas DataTables, pinta después de cada draw:
+$(document).on('init.dt draw.dt', function (e, settings) {
+    initEstadoColors(settings && settings.nTable ? settings.nTable : null);
+});
+
+// Si NO usas DataTables, puedes llamar una vez al cargar:
+$(function () {
+    initEstadoColors();
 });
 
 

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('cedula')->unique();
             $table->string('email')->unique();
-            $table->boolean('status')->default(true);
+            $table->string('estado')->default('activo');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();

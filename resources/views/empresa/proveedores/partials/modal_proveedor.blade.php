@@ -112,10 +112,33 @@
     </div>
 </div>
 
-
 @push('js')
 <script>
     $(document).ready(function () {
+    // Limpiar formulario al cambiar tipo de identificación (excepto el campo mismo)
+        $('#tipo_identificacion').on('change', function () {
+        const form = $('#form-proveedor');
+        form.find('input:not([name="_token"], [name="tipo_identificacion"], [name="proveedor_id"])').val('');
+        form.find('input[type=checkbox]').prop('checked', false);
+        form.find('select.select2').not('#tipo_identificacion').val('').trigger('change');
+        //$('#proveedor_id').val('');
+        $('#documentos-container input[type="file"]').val('');
+        $('#documentos-container #tipos-container').html('');
+        $('#documentos-container .documento-item').remove();
+        $('#documentos-guardados').html('');
+    });
+
+            //para que los selects me permitan buscar
+        $.fn.modal.Constructor.prototype._enforceFocus = function() {};
+        $('#modal-proveedor').on('shown.bs.modal', function () {
+            $(this).find('.select2bs4').select2({
+                theme: 'bootstrap4',
+                placeholder: 'Seleccione una opción',
+                allowClear: true,
+                minimumResultsForSearch: 5 // 🔥 Mostrar búsqueda solo si hay más de 5 opciones
+            });
+        });
+
     $('#telefono').inputmask('0999999999');
 
     // Al cerrar el modal, limpiar todos los campos del formulario
@@ -510,7 +533,6 @@ $(document).on('click', '.eliminar-documento', function () {
         }
     });
 });
-
 
 </script>
 @endpush

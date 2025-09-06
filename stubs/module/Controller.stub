@@ -1,0 +1,113 @@
+<?php
+namespace App\Http\Controllers\Empresa;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Empresa\{{ modulePlural }}\{{ module }};
+use Yajra\DataTables\Facades\DataTables;
+use App\Models\Admin\SubmenuEstablecimientoUsuario;
+use App\Http\Requests\{{ module }}Request;
+
+class {{ module }}Controller extends Controller
+{
+    public function index()
+    {
+        return view('empresa.{{ plural }}.index');
+    }
+
+        public function getData(Request $request)
+    {
+        $user = Auth::user();
+        $establecimientoId = session('establecimiento_id');
+        $submenuId = session('submenu_id');
+
+        if (!$establecimientoId || !$submenuId) {
+            abort(403, 'Establecimiento o Submenú no seleccionado.');
+        }
+
+        $permisos = SubmenuEstablecimientoUsuario::where('user_id', $user->id)
+            ->where('establecimiento_id', $establecimientoId)
+            ->where('submenu_id', $submenuId)
+            ->first();
+
+        $datos_consulta = {{ module }}::where('id_establecimiento', $establecimientoId);
+
+        return DataTables::eloquent($datos_consulta)
+            ->filter(function ($query) use ($request) {
+                foreach ($request->columns as $index => $column) {
+                    $searchValue = $column['search']['value'] ?? '';
+                    if ($searchValue !== '') {
+                        switch ($index) {
+                            case 0:
+                                $query->where('nombre', 'like', "%$searchValue%");
+                                break;
+                            case 1:
+                                $query->where('descripcion', 'like', "%$searchValue%");
+                                break;
+                            case 2:
+                                $query->where('status', $searchValue);
+                                break;
+                        }
+                    }
+                }
+            })
+            ->addColumn('acciones', function ($datos_consulta) use ($permisos) {
+                $botones = '<div class="d-flex" style="gap: 0.25rem;">';
+                if (\App\Helpers\PermisosHelper::puedeRealizarAccion('modificar', $permisos)) {
+                    $botones .= '<button class="btn btn-warning btn-sm editar-{{ moduleLower }}" data-id="' . $datos_consulta->id . '" title="Editar"><i class="fas fa-edit"></i></button>';
+                }
+                if (\App\Helpers\PermisosHelper::puedeRealizarAccion('eliminar', $permisos)) {
+                    $botones .= '<button class="btn btn-danger btn-sm eliminar-{{ moduleLower }}" data-id="' . $datos_consulta->id . '" title="Eliminar"><i class="fas fa-trash-alt"></i></button>';
+                }
+                $botones .= '</div>';
+                return $botones;
+            })
+            ->addColumn('status', function ($datos_consulta) {
+                return $datos_consulta->status === 'Activo'
+                    ? '<span class="badge badge-success"><i class="fas fa-check-circle"></i> Activo</span>'
+                    : '<span class="badge badge-danger"><i class="fas fa-times-circle"></i> Inactivo</span>';
+            })
+            ->rawColumns(['acciones', 'status'])
+            ->make(true);
+    }
+
+        public function store({{ module }}Request $request)
+    {
+        $data = $request->validated();
+        $data['id_user'] = Auth::id();
+        $data['id_establecimiento'] = session('establecimiento_id');
+
+        {{ module }}::create($data);
+
+        return back()->with('success', '{{ module }} creada.');
+    }
+
+    public function show({{ module }} ${{ moduleLower }})
+    {
+        return response()->json(${{ moduleLower }});
+    }
+
+    public function update({{ module }}Request $request, {{ module }} ${{ moduleLower }})
+    {
+        ${{ moduleLower }}->update($request->validated());
+
+        return back()->with('success', '{{ module }} actualizada.');
+    }
+
+        public function destroy({{ module }} ${{ moduleLower }})
+    {
+        try {
+            ${{ moduleLower }}->delete();
+
+            return response()->json([
+                'message' => '{{ module }} eliminada correctamente.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al eliminar la {{ module }}.'
+            ], 500);
+        }
+    }
+
+
+}

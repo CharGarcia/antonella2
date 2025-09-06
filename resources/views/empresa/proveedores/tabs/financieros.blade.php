@@ -28,6 +28,9 @@
                 @include('components.input', [
                     'nombre' => 'numero_cuenta',
                     'label' => 'Número de Cuenta',
+                    'type' => 'number',
+                    'step' => '0.01',
+                    'min' => '0',
                     'col' => 'col-md-4',
                     'required' => false
                 ])

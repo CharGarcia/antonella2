@@ -28,7 +28,7 @@
                             <th>Ruta</th>
                             <th>Icono</th>
                             <th>Orden</th>
-                            <th>Activo</th>
+                            <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
                         <tr id="fila-filtros" class="filters">
@@ -48,8 +48,8 @@
                             <th>
                                 <select class="form-control form-control-sm">
                                     <option value="">Todos</option>
-                                    <option value="1">Activo</option>
-                                    <option value="0">Inactivo</option>
+                                    <option value="activo">Activo</option>
+                                    <option value="inactivo">Inactivo</option>
                                 </select>
                             </th>
                             <th></th>
@@ -99,10 +99,10 @@
                   <input type="number" class="form-control" name="orden" id="orden" value="0">
                 </div>
                 <div class="form-group col-md-6">
-                    <label for="activo">Status</label>
-                    <select name="activo" id="activo" class="form-control">
-                        <option value="1">Activo</option>
-                        <option value="0">Inactivo</option>
+                    <label for="estado">Estado</label>
+                    <select name="estado" id="estado" class="form-control">
+                        <option value="activo">Activo</option>
+                        <option value="inactivo">Inactivo</option>
                     </select>
                 </div>
               </div>
@@ -141,7 +141,7 @@ $(document).ready(function () {
             { data: 'ruta' },
             { data: 'icono' },
             { data: 'orden' },
-            { data: 'activo'},
+            { data: 'estado'},
             { data: 'acciones', orderable: false, searchable: false },
         ],
         language: {
@@ -208,7 +208,7 @@ $(document).ready(function () {
             $('#ruta').val(data.ruta);
             $('#icono').val(data.icono);
             $('#orden').val(data.orden);
-            $('#activo').val(data.activo);
+            $('#estado').val(data.estado);
             $('#modalSubMenuLabel').html('<i class="fas fa-edit text-warning mr-2"></i> Editar SubMenú');
             $('#modalSubmenu').modal('show');
         });

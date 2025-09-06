@@ -9,7 +9,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
-use App\Models\Empresa\Establecimiento;
+use App\Models\Admin\Establecimiento;
 
 /**
  * use App\Models\Admin\User;
@@ -50,7 +50,7 @@ class User extends Authenticatable
         'name',
         'cedula',
         'email',
-        'status',
+        'estado',
         'password',
         'remember_token',
     ];

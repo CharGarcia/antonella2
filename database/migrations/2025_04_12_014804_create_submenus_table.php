@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('ruta')->nullable();
             $table->string('icono')->nullable();
             $table->integer('orden')->default(0);
-            $table->boolean('activo')->default(true);
+            $table->string('estado')->default('activo');
             $table->timestamps();
             $table->foreign('menu_id')->references('id')->on('menus')->onDelete('cascade');
         });

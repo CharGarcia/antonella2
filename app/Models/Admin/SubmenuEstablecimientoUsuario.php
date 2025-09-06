@@ -3,7 +3,7 @@
 namespace App\Models\Admin;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Empresa\Establecimiento;
+use App\Models\Admin\Establecimiento;
 
 class SubmenuEstablecimientoUsuario extends Model
 {

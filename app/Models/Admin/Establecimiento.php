@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Empresa;
+namespace App\Models\Admin;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,10 +13,8 @@ class Establecimiento extends Model
 
     protected $fillable = [
         'empresa_id',
-        'serie',
         'nombre_comercial',
-        'establecimiento',
-        'punto_emision',
+        'serie',
         'direccion',
         'logo',
         'factura',
@@ -60,5 +58,11 @@ class Establecimiento extends Model
     public function empresa()
     {
         return $this->belongsTo(Empresa::class);
+    }
+
+    public function usuarios()
+    {
+        // Pivote: establecimiento_usuario (establecimiento_id, user_id)
+        return $this->belongsToMany(User::class, 'establecimiento_usuario', 'establecimiento_id', 'user_id');
     }
 }

@@ -26,7 +26,7 @@ class UsuariosController extends Controller
         $authUser = Auth::user();
 
         $users = User::with('roles:id,name')
-            ->select('id', 'name', 'cedula', 'email', 'status');
+            ->select('id', 'name', 'cedula', 'email', 'estado');
 
         // Lógica de acceso según el rol del usuario autenticado
         if ($authUser->hasRole('super_admin')) {
@@ -43,26 +43,28 @@ class UsuariosController extends Controller
             });
         }
 
-        $status = $request->input('columns.4.search.value');
-        if ($status !== null && $status !== '') {
-            $users->where('status', $status);
+        $estado = $request->input('columns.4.search.value');
+        if ($estado !== null && $estado !== '') {
+            $users->where('estado', $estado);
         }
 
         return datatables()->of($users)
             ->addColumn('roles', function ($user) {
                 return $user->roles->pluck('name')->join(', ');
             })
-            ->addColumn('status', function ($user) {
-                $checked = $user->status ? 'checked' : '';
-                $label = $user->status ? 'Activo' : 'Inactivo';
-                $color = $user->status ? 'text-success' : 'text-danger';
+            ->addColumn('estado', function ($user) {
+                $colorClass = $user->estado ? 'bg-success text-white' : 'bg-danger text-white';
+                $selectedActivo = $user->estado ? 'selected' : '';
+                $selectedInactivo = !$user->estado ? 'selected' : '';
+
                 return '
-                <div class="d-flex align-items-center justify-content-center gap-2">
-                    <div class="form-check form-switch mr-1">
-                        <input class="form-check-input toggle-status" type="checkbox" data-id="' . $user->id . '" ' . $checked . '>
-                    </div>
-                    <span class="status-label ' . $color . ' fw-bold">' . $label . '</span>
-                </div>';
+        <div class="d-flex align-items-center justify-content-center gap-2">
+            <select class="form-control form-control-sm select-estado ' . $colorClass . '" data-id="' . $user->id . '">
+                <option value="activo" ' . $selectedActivo . '>Activo</option>
+                <option value="inactivo" ' . $selectedInactivo . '>Inactivo</option>
+            </select>
+        </div>
+    ';
             })
             ->addColumn('acciones', function ($user) {
                 return '
@@ -72,41 +74,42 @@ class UsuariosController extends Controller
             </button>
         </div>';
             })
-            ->rawColumns(['roles', 'status', 'acciones'])
+            ->rawColumns(['roles', 'estado', 'acciones'])
             ->make(true);
     }
 
     //para cambiar el estado actvo o inactivo y ademas debe haber al menos un usuario super_admin activo
+
     public function updateStatus(Request $request)
     {
-        $user = User::findOrFail($request->id);
-        $nuevoEstado = (bool) $request->status;
+        $data = $request->validate([
+            'id'     => ['required', 'integer', 'exists:users,id'],
+            'estado' => ['required', 'in:activo,inactivo'],
+        ]);
 
-        // Validación: Si está intentando desactivar un super_admin
-        if ($user->hasRole('super_admin') && $nuevoEstado === false) {
-            $superAdminsActivos = User::whereHas('roles', function ($q) {
-                $q->where('name', 'super_admin');
-            })
-                ->where('status', true)
+        $user = \App\Models\Admin\User::findOrFail($data['id']);
+
+        // 🚨 Si el usuario es super_admin y se intenta inactivar, verificamos
+        if ($data['estado'] === 'inactivo' && $user->hasRole('super_admin')) {
+            $otrosSuperAdmins = \App\Models\Admin\User::role('super_admin')
                 ->where('id', '!=', $user->id)
+                ->where('estado', 1) // activos
                 ->count();
 
-            if ($superAdminsActivos === 0) {
+            if ($otrosSuperAdmins === 0) {
                 return response()->json([
-                    'message' => 'Debe haber al menos un usuario super_admin activo.',
+                    'message' => 'No puedes desactivar al único super_admin del sistema.'
                 ], 403);
             }
         }
 
-        // Si pasa la validación, actualiza el estado
-        $user->status = $nuevoEstado;
+        // ✅ Actualizar estado normalmente
+        $user->estado = $data['estado'] === 'activo' ? 1 : 0;
         $user->save();
 
-        return response()->json([
-            'message' => 'Estado actualizado correctamente.',
-            'status' => $user->status,
-        ]);
+        return response()->json(['message' => 'Estado actualizado correctamente.']);
     }
+
 
     public function asignarEmpresas(Request $request, User $user)
     {

@@ -79,8 +79,8 @@
                             <th>
                                 <select class="form-control form-control-sm">
                                 <option value="">Todas</option>
-                                <option value="1">Activa</option>
-                                <option value="0">Inactiva</option>
+                                <option value="activo">Activa</option>
+                                <option value="inactivo">Inactiva</option>
                               </select>
                             </th>
                             <th></th>
@@ -171,8 +171,8 @@
                         <div class="form-group col-md-4 mb-2">
                             <label>Estado</label>
                             <select class="form-control" id="estado" name="estado" required>
-                                <option value="1" Selected>Activa</option>
-                                <option value="0">Inactiva</option>
+                                <option value="activo" Selected>Activa</option>
+                                <option value="inactivo">Inactiva</option>
                               </select>
                         </div>
                     </div>
@@ -344,7 +344,7 @@ $('#ruc').on('change', function () {
                     $('#contabilidad').val(contribuyente.obligadoLlevarContabilidad === 'SI' ? 'SI' : 'NO');
                     $('#contribuyente_especial').val(contribuyente.contribuyenteEspecial === 'SI' ? 'SI' : 'NO');
                     $('#agente_retencion').val(contribuyente.agenteRetencion === 'SI' ? 'SI' : 'NO');
-                    $('#estado').val(contribuyente.estadoContribuyenteRuc === 'ACTIVO' ? '1' : '0');
+                    $('#estado').val(contribuyente.estadoContribuyenteRuc === 'activo' ? 'activo' : 'inactivo');
 
                     // Representante legal
                     const representante = contribuyente.representantesLegales?.[0];

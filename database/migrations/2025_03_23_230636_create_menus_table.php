@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('nombre'); // Nombre visible en el menú
             $table->string('icono')->nullable(); // Icono de AdminLTE
             $table->integer('orden')->default(0); // Orden del menú
-            $table->boolean('activo')->default(true); // Si se muestra o no
+            $table->string('estado')->default('activo');
             $table->timestamps();
         });
     }

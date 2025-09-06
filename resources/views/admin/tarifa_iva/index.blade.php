@@ -61,8 +61,8 @@
                 <div class="form-group col-md-4 mb-2">
                     <label class="form-label" for="estado">Estado</label>
                     <select class="form-control" id="estado" name="estado" required>
-                        <option value="1" Selected>Activo</option>
-                        <option value="0">Inactivo</option>
+                        <option value="activo" Selected>Activo</option>
+                        <option value="inactivo">Inactivo</option>
                       </select>
                 </div>
             </div>

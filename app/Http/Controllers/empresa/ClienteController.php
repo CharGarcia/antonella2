@@ -27,14 +27,14 @@ class ClienteController extends Controller
             ->orderBy('nombre')
             ->pluck('nombre', 'id');
 
-        $listasPrecios = ListaPrecio::where('id_establecimiento', session('establecimiento_id'))
+        /* $listasPrecios = ListaPrecio::where('id_establecimiento', session('establecimiento_id'))
             ->where('estado', true)
             ->orderBy('nombre')
-            ->pluck('nombre', 'id');
+            ->pluck('nombre', 'id'); */
 
         $formasPago = FormasPagoSri::pluck('descripcion', 'codigo'); // O el campo adecuado
 
-        return view('empresa.clientes.index', compact('formasPago', 'vendedores', 'listasPrecios'));
+        return view('empresa.clientes.index', compact('formasPago', 'vendedores'));
     }
 
     public function getData(Request $request)
@@ -138,6 +138,7 @@ class ClienteController extends Controller
         ];
 
         $validator = Validator::make($request->all(), [
+            'cliente_id' => 'nullable|exists:personas,id',
             'tipo_identificacion' => 'required|string',
             'numero_identificacion' => 'required|string',
             'nombre' => 'required|string|max:255',
@@ -157,7 +158,7 @@ class ClienteController extends Controller
             'categoria_cliente' => 'nullable|string',
             'segmento' => 'nullable|string',
             'vendedor_asignado' => 'nullable|string',
-            'lista_precios' => 'nullable|string',
+            'id_lista_precios' => 'nullable|exists:lista_precios,id',
             'canal_venta' => 'nullable|string',
             'zona' => 'nullable|string',
             'clasificacion' => 'nullable|string',
@@ -226,7 +227,6 @@ class ClienteController extends Controller
 
         $data = $validator->validated();
 
-        // ✅ Formateo de fechas
         if (!empty($data['inicio_relacion'])) {
             try {
                 $data['inicio_relacion'] = Carbon::createFromFormat('d/m/Y', $data['inicio_relacion'])->format('Y-m-d');
@@ -243,30 +243,28 @@ class ClienteController extends Controller
             }
         }
 
-        // ✅ Buscar si la persona YA existe
+        $clienteId = $data['cliente_id'] ?? null;
+
         $persona = \App\Models\Empresa\Personas\Persona::where('numero_identificacion', trim($data['numero_identificacion']))
             ->where('id_establecimiento', session('establecimiento_id'))
             ->first();
 
         if ($persona) {
-            // ✅ Si YA es cliente, error
             if (in_array('cliente', $persona->tipo ?? [])) {
-                return response()->json([
-                    'message' => 'El cliente ya se encuentra registrado.',
-                ], 422);
+                if (!$clienteId || $persona->id != $clienteId) {
+                    return response()->json([
+                        'message' => 'El cliente ya se encuentra registrado.',
+                    ], 422);
+                }
             }
 
-            // ✅ Si existe pero NO es cliente → agregarlo como cliente
             $tipos = $persona->tipo ?? [];
             if (!in_array('cliente', $tipos)) {
                 $tipos[] = 'cliente';
             }
             $persona->tipo = $tipos;
-
-            // Actualizar datos generales
             $persona->fill($data)->save();
         } else {
-            // ✅ Crear nueva persona
             foreach (['nombre', 'direccion', 'provincia', 'ciudad', 'pais', 'nombre_comercial'] as $campo) {
                 if (!empty($data[$campo])) {
                     $data[$campo] = strtoupper(preg_replace('/\s+/', ' ', trim($data[$campo])));
@@ -285,7 +283,6 @@ class ClienteController extends Controller
             ));
         }
 
-        // ✅ Crear datos_cliente si NO existen
         $datosCliente = $persona->datosCliente;
         if (!$datosCliente) {
             $datosCliente = $persona->datosCliente()->create([
@@ -294,7 +291,7 @@ class ClienteController extends Controller
                 'segmento' => $data['segmento'] ?? null,
                 'fecha_registro' => Carbon::now(),
                 'vendedor_asignado' => $data['vendedor_asignado'] ?? null,
-                'lista_precios' => $data['lista_precios'] ?? null,
+                'id_lista_precios' => $data['id_lista_precios'] ?? null,
                 'canal_venta' => $data['canal_venta'] ?? null,
                 'zona' => $data['zona'] ?? null,
                 'clasificacion' => $data['clasificacion'] ?? null,
@@ -304,7 +301,6 @@ class ClienteController extends Controller
             ]);
         }
 
-        // ✅ Otras relaciones
         $datosCliente->configuracion()->updateOrCreate([], [
             'notas' => $data['notas'] ?? null,
             'permitir_venta_con_deuda' => $data['permitir_venta_con_deuda'] ?? true,
@@ -370,6 +366,7 @@ class ClienteController extends Controller
         return response()->json(['message' => 'Cliente registrado correctamente.']);
     }
 
+
     public function update(Request $request, $id)
     {
         $persona = \App\Models\Empresa\Personas\Persona::findOrFail($id);
@@ -383,7 +380,6 @@ class ClienteController extends Controller
                     ->where(
                         fn($query) =>
                         $query->where('id_establecimiento', session('establecimiento_id'))
-                            ->whereJsonContains('tipo', 'cliente')
                     )
                     ->ignore($persona->id),
             ],
@@ -406,7 +402,7 @@ class ClienteController extends Controller
             'segmento' => 'nullable|string',
             'fecha_registro' => 'nullable|date',
             'vendedor_asignado' => 'nullable|string',
-            'lista_precios' => 'nullable|string',
+            'id_lista_precios' => 'nullable|exists:lista_precios,id',
             'canal_venta' => 'nullable|string',
             'zona' => 'nullable|string',
             'clasificacion' => 'nullable|string',
@@ -476,29 +472,23 @@ class ClienteController extends Controller
 
         $data = $validator->validated();
 
-        // ✅ Conversiones de fechas
+        // ✅ Conversión de fechas
         if (!empty($data['inicio_relacion'])) {
-            $data['inicio_relacion'] = Carbon::createFromFormat('d/m/Y', $data['inicio_relacion'])
-                ->format('Y-m-d');
+            $data['inicio_relacion'] = Carbon::createFromFormat('d/m/Y', $data['inicio_relacion'])->format('Y-m-d');
         }
-
         if (!empty($data['ultima_compra_fecha'])) {
-            $data['ultima_compra_fecha'] = Carbon::createFromFormat('d/m/Y', $data['ultima_compra_fecha'])
-                ->format('Y-m-d');
+            $data['ultima_compra_fecha'] = Carbon::createFromFormat('d/m/Y', $data['ultima_compra_fecha'])->format('Y-m-d');
         }
 
-        // ✅ Formateo
+        // ✅ Formateo de campos
         foreach (['nombre', 'direccion', 'provincia', 'ciudad', 'pais', 'nombre_comercial'] as $campo) {
             if (!empty($data[$campo])) {
                 $data[$campo] = strtoupper(preg_replace('/\s+/', ' ', trim($data[$campo])));
             }
         }
+        $data['email'] = implode(',', array_map('strtolower', array_map('trim', explode(',', $data['email']))));
 
-        $data['email'] = !empty($data['email'])
-            ? implode(',', array_map('strtolower', array_map('trim', explode(',', $data['email']))))
-            : null;
-
-        // ✅ Asegurar que el tipo 'cliente' exista en persona
+        // ✅ Asegurar tipo cliente
         $tipos = $persona->tipo ?? [];
         if (!in_array('cliente', $tipos)) {
             $tipos[] = 'cliente';
@@ -507,66 +497,13 @@ class ClienteController extends Controller
 
         $persona->fill($data)->save();
 
-        // ✅ Crear datosCliente si no existía
         $datosCliente = $persona->datosCliente;
-        if (!$datosCliente) {
-            $datosCliente = $persona->datosCliente()->create([
-                'codigo_interno' => $data['codigo_interno'] ?? null,
-                'categoria_cliente' => $data['categoria_cliente'] ?? null,
-                'segmento' => $data['segmento'] ?? null,
-                'fecha_registro' => Carbon::now(),
-                'vendedor_asignado' => $data['vendedor_asignado'] ?? null,
-                'lista_precios' => $data['lista_precios'] ?? null,
-                'canal_venta' => $data['canal_venta'] ?? null,
-                'zona' => $data['zona'] ?? null,
-                'clasificacion' => $data['clasificacion'] ?? null,
-                'inicio_relacion' => $data['inicio_relacion'] ?? null,
-                'estado' => $data['estado'],
-                'configuracion_especial' => $data['configuracion_especial'] ?? null,
-            ]);
-        } else {
-            $datosCliente->update([
-                'codigo_interno' => $data['codigo_interno'] ?? null,
-                'categoria_cliente' => $data['categoria_cliente'] ?? null,
-                'segmento' => $data['segmento'] ?? null,
-                'fecha_registro' => Carbon::now(),
-                'vendedor_asignado' => $data['vendedor_asignado'] ?? null,
-                'lista_precios' => $data['lista_precios'] ?? null,
-                'canal_venta' => $data['canal_venta'] ?? null,
-                'zona' => $data['zona'] ?? null,
-                'clasificacion' => $data['clasificacion'] ?? null,
-                'inicio_relacion' => $data['inicio_relacion'] ?? null,
-                'estado' => $data['estado'],
-                'configuracion_especial' => $data['configuracion_especial'] ?? null,
-            ]);
-        }
+        $datosCliente ? $datosCliente->update(array_merge($data, ['fecha_registro' => Carbon::now()])) :
+            $datosCliente = $persona->datosCliente()->create(array_merge($data, ['fecha_registro' => Carbon::now()]));
 
-        $datosCliente->configuracion()->updateOrCreate([], $request->only([
-            'notas',
-            'permitir_venta_con_deuda',
-            'aplica_descuento'
-        ]));
-
-        $datosCliente->financieros()->updateOrCreate([], $request->only([
-            'cupo_credito',
-            'dias_credito',
-            'forma_pago',
-            'observaciones_crediticias',
-            'historial_pagos',
-            'nivel_riesgo'
-        ]));
-
-        $datosCliente->tributarios()->updateOrCreate([], $request->only([
-            'agente_retencion',
-            'contribuyente_especial',
-            'obligado_contabilidad',
-            'parte_relacionada',
-            'regimen_tributario',
-            'retencion_fuente',
-            'retencion_iva',
-            'porcentajes_retencion'
-        ]));
-
+        $datosCliente->configuracion()->updateOrCreate([], $request->only(['notas', 'permitir_venta_con_deuda', 'aplica_descuento']));
+        $datosCliente->financieros()->updateOrCreate([], $request->only(['cupo_credito', 'dias_credito', 'forma_pago', 'observaciones_crediticias', 'historial_pagos', 'nivel_riesgo']));
+        $datosCliente->tributarios()->updateOrCreate([], $request->only(['agente_retencion', 'contribuyente_especial', 'obligado_contabilidad', 'parte_relacionada', 'regimen_tributario', 'retencion_fuente', 'retencion_iva', 'porcentajes_retencion']));
         $datosCliente->kpi()->updateOrCreate([], [
             'total_ventas' => $data['total_ventas'] ?? 0,
             'ultima_compra_fecha' => $data['ultima_compra_fecha'] ?? null,
@@ -576,19 +513,15 @@ class ClienteController extends Controller
             'promedio_mensual' => $data['promedio_mensual'] ?? 0,
             'productos_frecuentes' => $data['productos_frecuentes'] ?? [],
         ]);
-
-        $datosCliente->contables()->updateOrCreate(
-            [],
-            [
-                'cta_contable_cliente' => $data['cta_contable_cliente'] ?? null,
-                'cta_anticipos_cliente' => $data['cta_anticipos_cliente'] ?? null,
-                'cta_ingresos_diferidos' => $data['cta_ingresos_diferidos'] ?? null,
-                'centro_costo' => $data['centro_costo'] ?? null,
-                'proyecto' => $data['proyecto'] ?? null,
-                'segmento_contable' => $data['segmento_contable'] ?? null,
-                'indicador_contab_separada' => $data['indicador_contab_separada'] ?? 'N',
-            ]
-        );
+        $datosCliente->contables()->updateOrCreate([], [
+            'cta_contable_cliente' => $data['cta_contable_cliente'] ?? null,
+            'cta_anticipos_cliente' => $data['cta_anticipos_cliente'] ?? null,
+            'cta_ingresos_diferidos' => $data['cta_ingresos_diferidos'] ?? null,
+            'centro_costo' => $data['centro_costo'] ?? null,
+            'proyecto' => $data['proyecto'] ?? null,
+            'segmento_contable' => $data['segmento_contable'] ?? null,
+            'indicador_contab_separada' => $data['indicador_contab_separada'] ?? 'N',
+        ]);
 
         if ($request->hasFile('documentos')) {
             foreach ($request->file('documentos') as $index => $archivo) {
@@ -617,9 +550,6 @@ class ClienteController extends Controller
 
         return response()->json(['message' => 'Cliente actualizado correctamente.']);
     }
-
-
-
 
     public function edit(Persona $cliente)
     {

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->date('fecha_registro')->nullable();
             $table->string('zona')->nullable();
             $table->date('inicio_relacion')->nullable();
-            $table->enum('estado', ['activo', 'inactivo'])->default('activo');
+            $table->string('estado')->default('activo');
             $table->json('informacion_adicional')->nullable();
             $table->decimal('monto_ventas_asignado', 12, 2)
                 ->default(0)

@@ -24,7 +24,7 @@ class ProveedorController extends Controller
     {
         $compradores = Persona::query()
             ->where('id_establecimiento', session('establecimiento_id'))
-            ->whereJsonContains('tipo', ['vendedor'])
+            ->whereJsonContains('tipo', ['comprador'])
             ->orderBy('nombre')
             ->pluck('nombre', 'id');
 

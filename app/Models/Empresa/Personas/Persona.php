@@ -4,7 +4,7 @@ namespace App\Models\Empresa\Personas;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Empresa\Establecimiento;
+use App\Models\Admin\Establecimiento;
 use App\Models\Admin\User;
 use App\Models\Empresa\Clientes\DatosCliente;
 use App\Models\Empresa\Vendedores\DatosVendedor;

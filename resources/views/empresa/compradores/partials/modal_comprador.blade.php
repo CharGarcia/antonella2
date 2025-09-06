@@ -44,6 +44,29 @@
 @push('js')
 <script>
 $(document).ready(function () {
+
+// Limpiar formulario al cambiar tipo de identificación (sin borrar el propio campo)
+$('#tipo_identificacion').on('change', function () {
+    const form = $('#form-comprador');
+    form.find('input:not([name="_token"], [name="tipo_identificacion"])').val('');
+    form.find('input[type=checkbox]').prop('checked', false);
+    form.find('select.select2').not('#tipo_identificacion').val('').trigger('change');
+    $('#comprador_id').val('');
+});
+
+        //para que los selects me permitan buscar
+        $.fn.modal.Constructor.prototype._enforceFocus = function() {};
+        $('#modal-comprador').on('shown.bs.modal', function () {
+            $(this).find('.select2bs4').select2({
+                theme: 'bootstrap4',
+                placeholder: 'Seleccione una opción',
+                allowClear: true,
+                minimumResultsForSearch: 5 // 🔥 Mostrar búsqueda solo si hay más de 5 opciones
+            });
+        });
+
+
+
     $('#telefono').inputmask('0999999999');
 
     $('#modal-comprador').on('hidden.bs.modal', function () {
@@ -94,6 +117,49 @@ $(document).ready(function () {
                     $('#zona').val(p.zona ?? '');
                     $('#direccion').val(p.direccion ?? '');
                     $('#email').val(p.email ?? '');
+                }else {
+                    Swal.fire({
+                        title: 'Consultando SRI...',
+                        allowOutsideClick: false,
+                        didOpen: () => Swal.showLoading()
+                    });
+
+                    $.ajax({
+                        url: 'http://137.184.159.242:4000/api/sri-identification',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        dataType: 'json',
+                        data: JSON.stringify({ identification: numero_identificacion }),
+                        success: function (response) {
+                            Swal.close();
+                            if (esRucValido) {
+                                const c = response.data?.datosContribuyente?.[0];
+                                const establecimientos = response.data?.establecimientos ?? [];
+                                if (c) {
+                                    $('#nombre').val(c.razonSocial ?? '');
+                                    $('#estado').val(c.estadoContribuyenteRuc === 'ACTIVO' ? 'activo' : 'inactivo');
+                           }
+
+                                const matriz = establecimientos.find(est => est.matriz === 'SI');
+                                if (matriz?.direccionCompleta) {
+                                    const partes = matriz.direccionCompleta.split(' / ');
+                                    $('#provincia').val(partes[0] ?? '');
+                                    $('#ciudad').val(partes[1] ?? '');
+                                    $('#zona').val(partes[2] ?? '');
+                                    $('#direccion').val(partes[3] ?? '');
+                                }
+                            }
+
+                            if (esCedulaValida) {
+                                const c = response.data;
+                                $('#nombre').val(c.nombreCompleto ?? '');
+                            }
+                        },
+                        error: function () {
+                            Swal.close();
+                            Swal.fire('Error', 'No se pudo obtener información del SRI', 'error');
+                        }
+                    });
                 }
             });
         }
@@ -231,5 +297,6 @@ $(document).ready(function () {
         });
     });
 });
+
 </script>
 @endpush

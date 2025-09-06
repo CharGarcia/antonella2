@@ -1,0 +1,82 @@
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+
+class {{ module }}Request extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true; // Ajusta con Policies si aplica
+    }
+
+    public function rules(): array
+    {
+        /**
+         * 1) Reglas base generadas por parseFields() en MakeModule
+         *    {{ validationRules }} quedará como array plano tipo:
+         *    'campo' => ['required','string','max:150'],
+         *    'status' => ['required','in:activo,inactivo'],
+         *    etc.
+         */
+        $rules = [
+            {{ validationRules }}
+        ];
+
+        /**
+         * 2) Regla de unicidad compuesta para `nombre` por establecimiento (opcional)
+         *    - Solo se aplica si el formulario trae `nombre`
+         *    - Ignora el ID en PUT/PATCH (soporta route model o ID)
+         */
+        if ($this->has('nombre')) {
+            $establecimientoId = session('establecimiento_id');
+            $nombreNormalizado = strtolower(trim((string) $this->input('nombre')));
+
+            if ($establecimientoId) {
+                $uniqueNombre = Rule::unique('{{ table }}')
+                    ->where(function ($query) use ($nombreNormalizado, $establecimientoId) {
+                        return $query
+                            ->whereRaw('LOWER(nombre) = ?', [$nombreNormalizado])
+                            ->where('id_establecimiento', $establecimientoId);
+                    });
+
+                if ($this->isMethod('put') || $this->isMethod('patch')) {
+                    $routeModelOrId = $this->route('{{ moduleLower }}');
+                    $id = is_object($routeModelOrId) ? ($routeModelOrId->id ?? null) : $routeModelOrId;
+                    if ($id) {
+                        $uniqueNombre->ignore($id);
+                    }
+                }
+
+                // Si ya existe la clave 'nombre' en $rules, añadimos la regla unique compuesta
+                if (isset($rules['nombre'])) {
+                    $rules['nombre'][] = $uniqueNombre;
+                } else {
+                    $rules['nombre'] = [$uniqueNombre];
+                }
+            }
+        }
+
+        return $rules;
+    }
+
+    public function messages(): array
+    {
+        return [
+            // Mensajes genéricos útiles para los placeholders
+            'required' => 'Este campo es obligatorio.',
+            'string'   => 'Este campo debe ser una cadena de texto.',
+            'max'      => 'Este campo supera el tamaño máximo permitido.',
+            'boolean'  => 'Este campo debe ser verdadero o falso.',
+            'in'       => 'El valor seleccionado no es válido.',
+            'email'    => 'Ingrese un correo electrónico válido.',
+
+            // Campos comunes
+            'nombre.required' => 'El nombre es obligatorio.',
+            'nombre.unique'   => 'Ya existe un registro con ese nombre en este establecimiento.',
+            'status.in'       => 'El estado debe ser activo o inactivo.',
+        ];
+    }
+}

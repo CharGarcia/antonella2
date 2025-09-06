@@ -5,7 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
-use App\Models\Admin\SubmenuEstablecimientoUsuario;
+//use App\Models\Admin\SubmenuEstablecimientoUsuario;
 
 class VerificarPermisosSubmenu
 {

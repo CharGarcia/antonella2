@@ -15,11 +15,12 @@ use App\Http\Controllers\Admin\AsignacionEstablecimientoUsuarioController;
 use App\Http\Controllers\Admin\AsignacionEstablecimientoUsuarioAdminController;
 use App\Http\Controllers\Auth\RegistroController;
 use App\Http\Controllers\Admin\UsuarioAsignadoController;
-use App\Http\Controllers\empresa\ClienteController;
+use App\Http\Controllers\Empresa\ClienteController;
 use App\Http\Controllers\Empresa\VendedorController;
 use App\Http\Controllers\Empresa\CompradorController;
 use App\Http\Controllers\empresa\ProveedorController;
 use App\Http\Controllers\Empresa\PersonaController;
+use App\Http\Controllers\Empresa\CategoriaController;
 
 
 Route::get('/', function () {
@@ -37,7 +38,7 @@ Route::middleware([
     })->name('home');
 });
 
-//para cargar el select de las empresas
+//para cargar el select de las establecimientos
 Route::post('/establecimiento/cambiar', [EstablecimientoController::class, 'cambiar'])->name('establecimiento.cambiar');
 
 
@@ -55,22 +56,23 @@ Route::middleware(['auth'])
     });
 
 
-//para compradores
-//permiso admin user: gestionar-compradores
-//ruta para submenus: compradores.compradores
-Route::middleware(['auth', 'verificar.permisos.submenu', 'can:gestionar-compradores'])
-    ->prefix('empresa/compradores')
-    ->name('compradores.')
+// >>> CategoriaModule START
+//permiso admin user: gestionar-categorias
+//ruta para submenus: categorias.categorias
+Route::middleware(['auth', 'verificar.permisos.submenu', 'can:gestionar-categorias'])
+    ->prefix('empresa/categorias')
+    ->name('categorias.')
     ->group(function () {
-        Route::get('/', [CompradorController::class, 'index'])->name('compradores');
-        Route::get('/data', [CompradorController::class, 'getData'])->name('data');
-        Route::get('/crear', [CompradorController::class, 'create'])->name('create');
-        Route::post('/', [CompradorController::class, 'store'])->name('store');
-        Route::get('/{comprador}/edit', [CompradorController::class, 'edit'])->name('edit');
-        Route::put('/{comprador}', [CompradorController::class, 'update'])->name('update');
-        Route::delete('/{comprador}', [CompradorController::class, 'destroy'])->name('destroy');
+        Route::get('/buscar', [CategoriaController::class, 'buscar'])->name('buscar'); // opcional si implementas buscar()
+        Route::get('/', [CategoriaController::class, 'index'])->name('categorias');
+        Route::get('/data', [CategoriaController::class, 'getData'])->name('data');
+        Route::post('/crear', [CategoriaController::class, 'create'])->name('create');
+        Route::post('/', [CategoriaController::class, 'store'])->name('store');
+        Route::get('/{categoria}/show', [CategoriaController::class, 'show'])->name('show');
+        Route::put('/{categoria}', [CategoriaController::class, 'update'])->name('update');
+        Route::delete('/{categoria}', [CategoriaController::class, 'destroy'])->name('destroy');
     });
-
+// <<< CategoriaModule END
 
 //para vendedores
 //permiso admin user: gestionar-vendedores
@@ -88,6 +90,21 @@ Route::middleware(['auth', 'verificar.permisos.submenu', 'can:gestionar-vendedor
         Route::delete('/{vendedor}', [VendedorController::class, 'destroy'])->name('destroy');
     });
 
+//para compradores
+//permiso admin user: gestionar-compradores
+//ruta para submenus: compradores.compradores
+Route::middleware(['auth', 'verificar.permisos.submenu', 'can:gestionar-compradores'])
+    ->prefix('empresa/compradores')
+    ->name('compradores.')
+    ->group(function () {
+        Route::get('/', [CompradorController::class, 'index'])->name('compradores');
+        Route::get('/data', [CompradorController::class, 'getData'])->name('data');
+        Route::get('/crear', [CompradorController::class, 'create'])->name('create');
+        Route::post('/', [CompradorController::class, 'store'])->name('store');
+        Route::get('/{comprador}/edit', [CompradorController::class, 'edit'])->name('edit');
+        Route::put('/{comprador}', [CompradorController::class, 'update'])->name('update');
+        Route::delete('/{comprador}', [CompradorController::class, 'destroy'])->name('destroy');
+    });
 
 
 // para clientes
@@ -124,8 +141,6 @@ Route::middleware(['auth', 'verificar.permisos.submenu', 'can:gestionar-proveedo
         Route::delete('/{proveedor}', [ProveedorController::class, 'destroy'])->name('destroy');
         Route::delete('/documentos/{documento}', [ProveedorController::class, 'eliminarDocumento'])->name('documentos.eliminar');
     });
-
-
 
 //rutas para asignar usuarios a usuarios admin
 Route::middleware(['auth'])

@@ -21,7 +21,7 @@ class RetencionSriController extends Controller
         // Filtro por estado desde la columna 6 del datatable
         $estado = $request->input('columns.6.search.value');
         if (!empty($estado)) {
-            $data->where('status', $estado);
+            $data->where('estado', $estado);
         }
 
         // 👉 APLICAMOS select() sobre el query ya filtrado
@@ -33,23 +33,23 @@ class RetencionSriController extends Controller
             'porcentaje',
             'impuesto',
             'codigo_ats',
-            'status',
+            'estado',
             'vigencia_desde',
             'vigencia_hasta'
         ]);
 
         return datatables()->of($data)
-            ->editColumn('status', function ($row) {
-                if ($row->status === 'activo') {
-                    return '<span class="badge badge-success"><i class="fas fa-check-circle"></i> Activo</span>';
+            ->editColumn('estado', function ($row) {
+                if ($row->estado === 'activo') {
+                    return '<span class="badge badge-success"><i class="fas fa-check-circle"></i> Activa</span>';
                 } else {
-                    return '<span class="badge badge-danger"><i class="fas fa-times-circle"></i> Inactivo</span>';
+                    return '<span class="badge badge-danger"><i class="fas fa-times-circle"></i> Inactiva</span>';
                 }
             })
             ->addColumn('acciones', function ($row) {
                 return '<button class="btn btn-sm btn-primary editar" data-id="' . $row->id . '"><i class="fas fa-edit"></i></button>';
             })
-            ->rawColumns(['acciones', 'status'])
+            ->rawColumns(['acciones', 'estado'])
             ->make(true);
     }
 

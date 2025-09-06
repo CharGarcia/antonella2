@@ -44,12 +44,6 @@
                     'col' => 'col-md-4'
                 ])
 
-                @include('components.select', [
-                    'nombre' => 'indicador_contab_separada',
-                    'label' => 'Contabilidad Separada',
-                    'opciones' => ['' => 'Seleccione', 'S' => 'Si', 'N' => 'No'],
-                    'col' => 'col-md-4', 'mostrarPrimeraOpcion' => false
-                ])
             </div>
         </div>
     </div>

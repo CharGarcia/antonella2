@@ -30,6 +30,7 @@
     #clienteTabs::-webkit-scrollbar-track {
         background-color: transparent;
     }
+
 </style>
 
 
@@ -112,6 +113,31 @@
 @push('js')
 <script>
     $(document).ready(function () {
+        // Limpiar formulario al cambiar tipo de identificación
+        $('#tipo_identificacion').on('change', function () {
+        const form = $('#form-cliente');
+        //form.find('input:not([name="_token"], [name="tipo_identificacion"])').val('');
+        form.find('input:not([name="_token"], [name="tipo_identificacion"], [name="cliente_id"])').val('');
+        form.find('input[type=checkbox]').prop('checked', false);
+        form.find('select.select2').not('#tipo_identificacion').val('').trigger('change');
+        //$('#cliente_id').val('');
+        $('#documentos-container input[type="file"]').val('');
+        $('#documentos-container #tipos-container').html('');
+        $('#documentos-container .documento-item').remove();
+        $('#documentos-guardados').html('');
+    });
+
+       //para que los selects me permitan buscar
+        $.fn.modal.Constructor.prototype._enforceFocus = function() {};
+        $('#modal-cliente').on('shown.bs.modal', function () {
+            $(this).find('.select2bs4').select2({
+                theme: 'bootstrap4',
+                placeholder: 'Seleccione una opción',
+                allowClear: true,
+                minimumResultsForSearch: 5 // 🔥 Mostrar búsqueda solo si hay más de 5 opciones
+            });
+        });
+
     $('#telefono').inputmask('0999999999');
 
     // Al cerrar el modal, limpiar todos los campos del formulario
@@ -134,28 +160,21 @@
         const form = $('#form-cliente')[0];
         form.reset();
 
+        // ✅ Evita borrar cliente_id y _token
         $('#form-cliente').find('input[type=hidden]').not('[name="_token"]').val('');
         $('#form-cliente').find('input[type=checkbox]').prop('checked', false);
         $('#form-cliente').find('select.select2').val('').trigger('change');
         $('#cliente_id').val('');
 
         // --- LIMPIEZA COMPLETA DEL TAB DOCUMENTOS ---
-        // Limpiar input file
         $('#documentos-container input[type="file"]').val('');
-
-        // Limpiar tipos generados
         $('#documentos-container #tipos-container').html('');
-
-        // Remover documentos previamente cargados
         $('#documentos-container .documento-item').remove();
-
-        // Limpiar documentos-guardados por si acaso
         $('#documentos-guardados').html('');
 
         $('#modalClienteLabel').html('<i class="fas fa-clipboard-check text-success mr-2"></i> Nuevo Cliente');
         $('#modal-cliente').modal('show');
     });
-
 
 
     // Autocompletado por identificación
@@ -238,10 +257,12 @@
         }
     });
 
-    // Guardar o editar cliente
 // Guardar o editar cliente
 $('#form-cliente').on('submit', function (e) {
     e.preventDefault();
+
+    const btn = $(this).find('button[type="submit"]');
+    btn.prop('disabled', true);
 
     const id = $('#cliente_id').val();
     const url = id
@@ -261,29 +282,29 @@ $('#form-cliente').on('submit', function (e) {
         contentType: false,
         processData: false,
         success: function (response) {
-    $('#modal-cliente').modal('hide');
+            $('#modal-cliente').modal('hide');
 
-    $('#modal-cliente').one('hidden.bs.modal', function () {
-        $('#form-cliente')[0].reset();
-        $('#form-cliente').find('input:hidden').not('.exclude-reset').val('');
-        $('#form-cliente').find('select').val(null).trigger('change');
-        $('#form-cliente').find('input:checkbox').prop('checked', false);
-        $('#form-cliente').find('.is-invalid').removeClass('is-invalid');
-        $('#form-cliente').find('.error-message').remove();
-        $('#clienteTabs a:first').tab('show');
-    });
+            $('#modal-cliente').one('hidden.bs.modal', function () {
+                $('#form-cliente')[0].reset();
+                $('#form-cliente').find('input:hidden').not('.exclude-reset').val('');
+                $('#form-cliente').find('select').val(null).trigger('change');
+                $('#form-cliente').find('input:checkbox').prop('checked', false);
+                $('#form-cliente').find('.is-invalid').removeClass('is-invalid');
+                $('#form-cliente').find('.error-message').remove();
+                $('#clienteTabs a:first').tab('show');
+            });
 
-    Swal.fire({
-        icon: 'success',
-        title: response.message || 'Cliente registrado correctamente.',
-        toast: true,
-        timer: 1500,
-        position: 'top-end',
-        showConfirmButton: false
-    });
+            Swal.fire({
+                icon: 'success',
+                title: response.message || 'Cliente registrado correctamente.',
+                toast: true,
+                timer: 1500,
+                position: 'top-end',
+                showConfirmButton: false
+            });
 
-    $('#tabla-clientes').DataTable().ajax.reload(null, false);
-},
+            $('#tabla-clientes').DataTable().ajax.reload(null, false);
+        },
 
         error: function (xhr) {
             if (xhr.status === 422) {
@@ -319,6 +340,9 @@ $('#form-cliente').on('submit', function (e) {
                     text: xhr.responseJSON?.message || 'Ocurrió un error inesperado.'
                 });
             }
+        },
+        complete: function () {
+            btn.prop('disabled', false);
         }
     });
 });
@@ -331,7 +355,6 @@ $(document).on('click', '.editar-cliente', function () {
 
     $.get(url, function (res) {
         const datos = res.datos_cliente ?? {};
-
         $('#cliente_id').val(res.id);
         $('#tipo_identificacion').val(res.tipo_identificacion).trigger('change');
         $('#numero_identificacion').val(res.numero_identificacion);
@@ -350,7 +373,7 @@ $(document).on('click', '.editar-cliente', function () {
         $('#categoria_cliente').val(datos.categoria_cliente ?? '');
         $('#segmento').val(datos.segmento ?? '');
         $('#vendedor_asignado').val(datos.vendedor_asignado ?? '').trigger('change');
-        $('#lista_precios').val(datos.lista_precios ?? '').trigger('change');
+        $('#id_lista_precios').val(datos.id_lista_precios ?? '').trigger('change');
         $('#canal_venta').val(datos.canal_venta ?? '');
         $('#zona').val(datos.zona ?? '');
         $('#clasificacion').val(datos.clasificacion ?? '');
@@ -392,7 +415,6 @@ $(document).on('click', '.editar-cliente', function () {
         $('#centro_costo').val(datos.contables?.centro_costo ?? '');
         $('#proyecto').val(datos.contables?.proyecto ?? '');
         $('#segmento_contable').val(datos.contables?.segmento_contable ?? '');
-        $('#indicador_contab_separada').val(datos.contables?.indicador_contab_separada ?? '');
 
         // Documentos
         const documentos = datos.documentos ?? [];
@@ -420,6 +442,7 @@ $(document).on('click', '.editar-cliente', function () {
         Swal.fire('Error', 'No se pudo cargar el cliente', 'error');
     });
 });
+
 
     // Eliminar cliente
     $(document).on('click', '.eliminar-cliente', function () {
@@ -493,7 +516,6 @@ $(document).on('click', '.eliminar-documento', function () {
         }
     });
 });
-
 
 </script>
 @endpush

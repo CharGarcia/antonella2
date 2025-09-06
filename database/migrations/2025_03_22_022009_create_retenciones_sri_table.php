@@ -19,7 +19,7 @@ return new class extends Migration
             $table->decimal('porcentaje', 5, 2); // ejemplo: 10.00%
             $table->string('impuesto'); // Ej: Renta, IVA
             $table->string('codigo_ats');
-            $table->enum('status', ['activo', 'inactivo'])->default('activo');
+            $table->string('estado')->default('activo');
             $table->date('vigencia_desde')->nullable();
             $table->date('vigencia_hasta')->nullable();
             $table->timestamps();

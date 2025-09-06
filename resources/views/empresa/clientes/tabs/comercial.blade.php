@@ -24,7 +24,7 @@
         ])
 
         @include('components.select', [
-            'nombre' => 'lista_precios',
+            'nombre' => 'id_lista_precios',
             'label' => 'Lista de Precios',
             'opciones' => $listasPrecios, 'mostrarPrimeraOpcion' => false, 'col' => 'col-md-4'
         ])

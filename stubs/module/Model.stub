@@ -1,0 +1,27 @@
+<?php
+
+namespace App\Models\Empresa\{{ module }};
+use App\Models\Admin\Establecimiento;
+use App\Models\Admin\User;
+
+use Illuminate\Database\Eloquent\Model;
+
+class {{ module }} extends Model
+{
+    protected $table = '{{ table }}';
+
+    protected $fillable = [
+        {{ fillable }}
+    ];
+
+    // Relaciones
+    public function establecimiento()
+    {
+        return $this->belongsTo(Establecimiento::class, 'id_establecimiento');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'id_user');
+    }
+}

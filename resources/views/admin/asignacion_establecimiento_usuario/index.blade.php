@@ -69,7 +69,7 @@
                     <div class="form-group col-md-12 mb-2">
                         <label for="establecimiento_id">Establecimiento</label>
                         <select name="establecimiento_id" id="establecimiento_id" class="form-control" required>
-                            @foreach(\App\Models\Empresa\Establecimiento::orderBy('nombre_comercial')->get() as $establecimiento)
+                            @foreach(\App\Models\Admin\Establecimiento::orderBy('nombre_comercial')->get() as $establecimiento)
                                 <option value="{{ $establecimiento->id }}">{{ $establecimiento->nombre_comercial }} - {{ $establecimiento->serie }}</option>
                             @endforeach
                         </select>

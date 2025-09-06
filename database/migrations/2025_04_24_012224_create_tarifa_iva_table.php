@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('codigo', 4)->unique();
             $table->string('descripcion', 50);
             $table->decimal('porcentaje', 5, 2);
-            $table->boolean('estado')->default(true);
+            $table->string('estado')->default('activo');
             $table->timestamps();
         });
     }

@@ -30,7 +30,7 @@ class TarifaIvaController extends Controller
                 </button>';
             })
             ->editColumn('estado', function ($tarifas) {
-                return $tarifas->estado == 1
+                return $tarifas->estado == 'activo'
                     ? '<span class="badge badge-success"><i class="fas fa-check-circle"></i> Activo</span>'
                     : '<span class="badge badge-danger"><i class="fas fa-times-circle"></i> Inactivo</span>';
             })

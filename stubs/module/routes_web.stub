@@ -1,0 +1,16 @@
+use App\Http\Controllers\Empresa\{{ module }}Controller;
+
+    Route::middleware(['auth', 'verificar.permisos.submenu', 'can:gestionar-{{ plural }}'])
+    ->prefix('empresa/{{ plural }}')
+    ->name('{{ plural }}.')
+    ->group(function () {
+        Route::get('/buscar', [{{ module }}Controller::class, 'buscar'])->name('buscar'); // opcional si implementas buscar()
+        Route::get('/', [{{ module }}Controller::class, 'index'])->name('{{ plural }}');
+        Route::get('/data', [{{ module }}Controller::class, 'getData'])->name('data');
+        Route::post('/crear', [{{ module }}Controller::class, 'create'])->name('create');
+        Route::post('/', [{{ module }}Controller::class, 'store'])->name('store');
+        Route::get('/{{ routeParam }}/show', [{{ module }}Controller::class, 'show'])->name('show');
+        Route::put('/{{ routeParam }}', [{{ module }}Controller::class, 'update'])->name('update');
+        Route::delete('/{{ routeParam }}', [{{ module }}Controller::class, 'destroy'])->name('destroy');
+    });
+

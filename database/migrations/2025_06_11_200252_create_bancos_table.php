@@ -12,7 +12,7 @@ class CreateBancosTable extends Migration
             $table->id();
             $table->string('codigo');
             $table->string('nombre');
-            $table->boolean('estado')->default(true); // activo/inactivo
+            $table->string('estado')->default('activo');
             $table->timestamps();
         });
     }

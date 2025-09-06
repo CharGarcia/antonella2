@@ -19,12 +19,12 @@ return new class extends Migration
             $table->string('segmento')->nullable();
             $table->date('fecha_registro')->nullable();
             $table->string('vendedor_asignado')->nullable();
-            $table->string('lista_precios')->nullable();
+            $table->foreignId('id_lista_precios')->nullable()->constrained('lista_precios')->nullOnDelete();
             $table->string('canal_venta')->nullable();
             $table->string('zona')->nullable();
             $table->string('clasificacion')->nullable();
             $table->date('inicio_relacion')->nullable();
-            $table->enum('estado', ['activo', 'inactivo'])->default('activo');
+            $table->string('estado')->default('activo');
             $table->json('configuracion_especial')->nullable();
             $table->timestamps();
         });

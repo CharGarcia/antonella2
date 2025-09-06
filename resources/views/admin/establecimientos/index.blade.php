@@ -15,7 +15,7 @@
                     <span class="texto-btn d-none d-md-inline">Mostrar filtros</span>
                 </button>
                 <button class="btn btn-success" id="btn-nuevo-establecimiento">
-                    <i class="fas fa-plus"></i> Nuevo Establecimiento
+                    <i class="fas fa-plus"></i> Nuevo
                 </button>
             </div>
 
@@ -26,23 +26,6 @@
                             <th>Empresa</th>
                             <th>Serie</th>
                             <th>Nombre comercial</th>
-                            <th>Dirección</th>
-                            <th>Logo</th>
-                            <th>Factura</th>
-                            <th>Nota_crédito</th>
-                            <th>Nota_débito</th>
-                            <th>Guía_remisión</th>
-                            <th>Retención</th>
-                            <th>Liquidación_compra</th>
-                            <th>Proforma</th>
-                            <th>Recibo</th>
-                            <th>Ingreso</th>
-                            <th>Egreso</th>
-                            <th>Orden_Compra</th>
-                            <th>Pedido</th>
-                            <th>Consignación_Venta</th>
-                            <th>Decimal_cantidad</th>
-                            <th>decimal_precio</th>
                             <th>Estado</th>
                             <th>Editar</th>
                         </tr>
@@ -50,23 +33,6 @@
                             <th><input type="text" class="form-control form-control-sm" placeholder="Empresa"></th>
                             <th><input type="text" class="form-control form-control-sm" placeholder="Serie"></th>
                             <th><input type="text" class="form-control form-control-sm" placeholder="Nombre comercial"></th>
-                            <th><input type="text" class="form-control form-control-sm" placeholder="Dirección"></th>
-                            <th><input type="text" class="form-control form-control-sm" placeholder="Logo"></th>
-                            <th><input type="text" class="form-control form-control-sm" placeholder="Factura"></th>
-                            <th><input type="text" class="form-control form-control-sm" placeholder="Nota de crédito"></th>
-                            <th><input type="text" class="form-control form-control-sm" placeholder="Nota de débito"></th>
-                            <th><input type="text" class="form-control form-control-sm" placeholder="Guía de remisión"></th>
-                            <th><input type="text" class="form-control form-control-sm" placeholder="Retención"></th>
-                            <th><input type="text" class="form-control form-control-sm" placeholder="Liquidación de compras"></th>
-                            <th><input type="text" class="form-control form-control-sm" placeholder="Proforma"></th>
-                            <th><input type="text" class="form-control form-control-sm" placeholder="Recibo"></th>
-                            <th><input type="text" class="form-control form-control-sm" placeholder="Ingreso"></th>
-                            <th><input type="text" class="form-control form-control-sm" placeholder="Egreso"></th>
-                            <th><input type="text" class="form-control form-control-sm" placeholder="Orden compra"></th>
-                            <th><input type="text" class="form-control form-control-sm" placeholder="Pedido"></th>
-                            <th><input type="text" class="form-control form-control-sm" placeholder="Consignación venta"></th>
-                            <th><input type="text" class="form-control form-control-sm" placeholder="Decimal cantidad"></th>
-                            <th><input type="text" class="form-control form-control-sm" placeholder="Decimal precio"></th>
                             <th>
                                 <select class="form-control form-control-sm">
                                 <option value="">Todos</option>
@@ -186,8 +152,8 @@
                         <div class="form-group col-md-4 mb-2">
                             <label>Estado</label>
                             <select class="form-control" id="estado" name="estado" required>
-                                <option value="1" Selected>Activo</option>
-                                <option value="0">Inactivo</option>
+                                <option value="activo" Selected>Activo</option>
+                                <option value="inactivo">Inactivo</option>
                               </select>
                         </div>
                         <div class="form-group col-md-8 mb-2">
@@ -324,23 +290,6 @@ $(document).ready(function () {
                 { data: 'empresa.razon_social', name: 'empresa.razon_social' },
                 { data: 'serie'},
                 { data: 'nombre_comercial'},
-                { data: 'direccion'},
-                { data: 'logo_img', name: 'logo', orderable: false, searchable: false },
-                { data: 'factura' },
-                { data: 'nota_credito'},
-                { data: 'nota_debito'},
-                { data: 'guia_remision'},
-                { data: 'retencion'},
-                { data: 'liquidacion_compra'},
-                { data: 'proforma'},
-                { data: 'recibo'},
-                { data: 'ingreso'},
-                { data: 'egreso'},
-                { data: 'orden_compra'},
-                { data: 'pedido'},
-                { data: 'consignacion_venta'},
-                { data: 'decimal_cantidad'},
-                { data: 'decimal_precio'},
                 { data: 'estado'},
                 { data: 'acciones', orderable: false, searchable: false },
             ],
@@ -469,7 +418,7 @@ $(document).ready(function () {
                     $('#serie').val(data.serie);
                     $('#nombre_comercial').val(data.nombre_comercial);
                     $('#direccion').val(data.direccion);
-                    $('#estado').val(data.estado ? '1' : '0').trigger('change');
+                    $('#estado').val(data.estado ? 'activo' : 'inactivo').trigger('change');
 
                     // Secuenciales
                     $('#factura').val(data.factura);
@@ -554,12 +503,12 @@ $('#serie').on('change', function () {
                     const nombreComercial = establecimiento.nombreFantasiaComercial?.trim();
                     $('#nombre_comercial').val(nombreComercial !== '' ? nombreComercial : razonSocial);
                     $('#direccion').val(establecimiento.direccionCompleta ?? '');
-                    $('#estado').val(establecimiento.estado === 'ABIERTO' ? '1' : '0');
+                    $('#estado').val(establecimiento.estado === 'activo' ? 'activo' : 'inactivo');
                 } else {
                     Swal.fire('Advertencia', `No se encontró el establecimiento ${numeroEstablecimiento} para el RUC ${ruc}.`, 'warning');
                     $('#nombre_comercial').val('');
                     $('#direccion').val('');
-                    $('#estado').val('0');
+                    $('#estado').val('');
                 }
             },
             error: function (xhr) {

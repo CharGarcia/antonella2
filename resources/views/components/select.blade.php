@@ -20,20 +20,20 @@
         })->all()
         : (is_array($opciones) ? $opciones : $opciones->toArray());
 
-    // Valor actual
-    $valorActual = old($nombre, $value ?? array_key_first($opcionesArray));
+    // Valor actual sin seleccionar por defecto la primera opción
+    $valorActual = old($nombre, $value);
 @endphp
 
 <div class="{{ $col }}">
     <label for="{{ $nombre }}">{{ $label }}</label>
-    <select name="{{ $nombre }}" id="{{ $nombre }}" class="form-control" {{ $required ? 'required' : '' }}>
+    <select name="{{ $nombre }}" id="{{ $nombre }}" class="form-control select2bs4" {{ $required ? 'required' : '' }}>
         @if($mostrarPrimeraOpcion)
             <option value="" {{ is_null($valorActual) || $valorActual === '' ? 'selected' : '' }}>
                 Seleccione...
             </option>
         @endif
 
-       @foreach ($opcionesArray as $key => $text)
+        @foreach ($opcionesArray as $key => $text)
             @php
                 $safeText = is_array($text) ? implode(' ', $text) : $text;
             @endphp

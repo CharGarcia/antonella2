@@ -27,7 +27,7 @@
                         <th>Nombre del menú</th>
                         <th>Ícono</th>
                         <th>Orden</th>
-                        <th>Status</th>
+                        <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
                     <tr id="fila-filtros" class="filters">
@@ -37,8 +37,8 @@
                         <th>
                             <select class="form-control form-control-sm">
                                 <option value="">Todos</option>
-                                <option value="1">Activo</option>
-                                <option value="0">Inactivo</option>
+                                <option value="activo">Activo</option>
+                                <option value="inactivo">Inactivo</option>
                             </select>
                         </th>
                         <th></th>
@@ -76,10 +76,10 @@
                         <input type="number" name="orden" id="orden" class="form-control" value="0">
                     </div>
                     <div class="form-group col-md-6">
-                        <label for="activo">Status</label>
-                        <select name="activo" id="activo" class="form-control">
-                            <option value="1">Activo</option>
-                            <option value="0">Inactivo</option>
+                        <label for="estado">Estado</label>
+                        <select name="estado" id="estado" class="form-control">
+                            <option value="activo">Activo</option>
+                            <option value="inactivo">Inactivo</option>
                         </select>
                     </div>
                 </div>
@@ -116,7 +116,7 @@ $(function () {
             { data: 'nombre' },
             { data: 'icono' },
             { data: 'orden' },
-            { data: 'activo'},
+            { data: 'estado'},
             { data: 'acciones', orderable: false, searchable: false }
         ],
         language: {
@@ -181,7 +181,7 @@ $(function () {
             $('#nombre').val(data.nombre);
             $('#icono').val(data.icono);
             $('#orden').val(data.orden);
-            $('#activo').val(data.activo);
+            $('#estado').val(data.estado);
             $('#modalMenuLabel').html('<i class="fas fa-edit text-warning mr-2"></i> Editar Menú');
             $('#modalMenu').modal('show');
         });

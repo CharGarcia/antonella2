@@ -35,8 +35,8 @@ class SubmenuController extends Controller
             ->editColumn('icono', function ($submenu) {
                 return '<i class="' . e($submenu->icono) . '" title="' . e($submenu->icono) . '"></i>';
             })
-            ->editColumn('activo', function ($submenu) {
-                return $submenu->activo
+            ->editColumn('estado', function ($submenu) {
+                return $submenu->estado=='activo'
                     ? '<span class="badge badge-success"><i class="fas fa-check-circle"></i> Activo</span>'
                     : '<span class="badge badge-danger"><i class="fas fa-times-circle"></i> Inactivo</span>';
             })
@@ -49,7 +49,7 @@ class SubmenuController extends Controller
                     <i class="fas fa-trash-alt"></i>
                 </button>';
             })
-            ->rawColumns(['icono', 'activo', 'acciones'])
+            ->rawColumns(['icono', 'estado', 'acciones'])
             ->make(true);
     }
 

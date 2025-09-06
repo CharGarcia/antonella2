@@ -1,0 +1,97 @@
+@extends('adminlte::page')
+
+@section('title', '{{ modulePlural }}')
+
+@section('content_header')
+    <h1>Gestión de {{ modulePlural }}</h1>
+@stop
+
+
+@extends('adminlte::page')
+
+@section('plugins.Datatables', true)
+@section('plugins.DatatablesPlugins', true)
+@section('plugins.Sweetalert2', true)
+
+@section('title', '{{ modulePlural }}')
+
+@section('content_header')
+    <h1>{{ modulePlural }}</h1>
+@stop
+
+@section('content')
+<div class="mb-3 d-flex gap-2 flex-wrap">
+    <button id="f_limpiar" class="btn btn-outline-secondary">Limpiar filtros</button>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <table id="tabla-{{ plural }}" class="table table-striped table-bordered w-100">
+      <thead>
+        <tr>
+          {{ tableHeaders }}
+          <th>Acciones</th>
+        </tr>
+        <tr class="filters-row">
+          {{ filterInputs }}
+          <th></th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+</div>
+
+@if(session('success'))
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    Swal.fire({ toast:true, position:'top-end', icon:'success', title:@json(session('success')), showConfirmButton:false, timer:2200 });
+  });
+</script>
+@endif
+@stop
+
+@push('js')
+<script>
+(function(){
+  const $table = $('#tabla-{{ plural }}');
+
+  function debounce(fn, d=450){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn.apply(this,a),d); }; }
+
+  const dt = $table.DataTable({
+    processing: true,
+    serverSide: true,
+    responsive: true,
+    stateSave: true,
+    order: [[0, 'asc']],
+    ajax: {
+      url: "{{ route('{{ plural }}.data') }}",
+      data: function(d) {
+        $table.find('thead tr.filters-row th').each(function(i){
+          const el = $(this).find('input, select');
+          if (!el.length) return;
+          const val = el.val();
+          d.columns[i] = d.columns[i] || {};
+          d.columns[i].search = { value: val || '' };
+        });
+      }
+    },
+    dom: 'Bfrtip',
+    buttons: ['excel', 'csv', 'print'],
+    columns: [
+      {{ dtColumns }}
+      { data: 'acciones', name: 'acciones', orderable:false, searchable:false },
+    ],
+    language: { url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json' }
+  });
+
+  $table.find('thead tr.filters-row input, thead tr.filters-row select')
+    .on('keyup change', debounce(()=> dt.ajax.reload()));
+
+  $('#f_limpiar').on('click', ()=>{
+    $table.find('thead tr.filters-row input, thead tr.filters-row select').val('');
+    dt.state.clear();
+    dt.ajax.reload();
+  });
+})();
+</script>
+@endpush

@@ -33,15 +33,15 @@ class MenuController extends Controller
             ->editColumn('icono', function ($menu) {
                 return '<i class="' . e($menu->icono) . '" title="' . e($menu->icono) . '"></i>';
             })
-            ->editColumn('activo', function ($menu) {
-                if ($menu->activo == 1) {
+            ->editColumn('estado', function ($menu) {
+                if ($menu->estado == 'activo') {
                     return '<span class="badge badge-success"><i class="fas fa-check-circle"></i> Activo</span>';
                 } else {
                     return '<span class="badge badge-danger"><i class="fas fa-times-circle"></i> Inactivo</span>';
                 }
             })
 
-            ->rawColumns(['acciones', 'icono', 'activo'])
+            ->rawColumns(['acciones', 'icono', 'estado'])
             ->make(true);
     }
 
@@ -52,7 +52,7 @@ class MenuController extends Controller
             'nombre' => 'required|string|max:255',
             'icono' => 'nullable|string|max:100',
             'orden' => 'nullable|integer',
-            'activo' => 'required|boolean'
+            //'activo' => 'required|boolean'
         ]);
 
         Menu::create($request->all());
@@ -71,7 +71,7 @@ class MenuController extends Controller
             'nombre' => 'required|string|max:255',
             'icono' => 'nullable|string|max:100',
             'orden' => 'nullable|integer',
-            'activo' => 'required|boolean'
+            //'activo' => 'required|boolean'
         ]);
 
         $menu->update($request->all());

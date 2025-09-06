@@ -98,8 +98,8 @@
                 <input type="text" class="form-control" id="codigo_ats" name="codigo_ats" required>
               </div>
               <div class="form-group col-md-3">
-                <label for="status">Estado</label>
-                <select class="form-control" id="status" name="status">
+                <label for="estado">Estado</label>
+                <select class="form-control" id="estado" name="estado">
                   <option value="activo">Activo</option>
                   <option value="inactivo">Inactivo</option>
                 </select>
@@ -226,7 +226,7 @@ $(document).on('click', '.editar', function () {
         $('#porcentaje').val(data.porcentaje);
         $('#impuesto').val(data.impuesto);
         $('#codigo_ats').val(data.codigo_ats);
-        $('#status').val(data.status);
+        $('#estado').val(data.estado);
         $('#vigencia_desde').val(data.vigencia_desde);
         $('#vigencia_hasta').val(data.vigencia_hasta);
         $('#modalRetencion').modal('show');
@@ -258,7 +258,7 @@ $(document).on('click', '.editar', function () {
         { data: 'porcentaje' },
         { data: 'impuesto' },
         { data: 'codigo_ats' },
-        { data: 'status' },
+        { data: 'estado' },
         { data: 'vigencia_desde' },
         { data: 'vigencia_hasta' },
         { data: 'acciones', orderable: false, searchable: false }

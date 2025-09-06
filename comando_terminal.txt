@@ -1,0 +1,35 @@
+iniciar todo desde cero
+php artisan migrate:fresh
+
+iniciar todo desde cero con seeders
+php artisan migrate:fresh --seed
+
+
+para generar modulos
+primero
+php artisan make:module Categoria \
+--plural=categorias \
+--fields="nombre:string(150):index, descripcion:string(255):nullable, status:boolean, id_establecimiento:foreignId:constrained=establecimientos:onDelete=cascade, id_user:foreignId:nullable:constrained=users:onDelete=set null" \
+--force
+
+segundo
+php artisan migrate
+
+
+
+seeders
+php artisan db:seed
+
+claves de usuarios
+1717136574 para el super admin.
+
+admin123 para los 4 admin.
+
+user123 para los 5 user.
+
+
+para guardar en git
+git add .
+git commit -m "mensaje"
+git push
+

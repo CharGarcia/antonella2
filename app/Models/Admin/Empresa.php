@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Empresa;
+namespace App\Models\Admin;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -30,8 +30,15 @@ class Empresa extends Model
         'estado',
     ];
 
+    // 🔹 Relación Empresa → Usuarios (a través de pivote, como ya tenías)
     public function usuarios()
     {
         return $this->belongsToMany(User::class, 'establecimiento_usuario');
+    }
+
+    // 🔹 Relación Empresa → Establecimientos
+    public function establecimientos()
+    {
+        return $this->hasMany(\App\Models\Admin\Establecimiento::class);
     }
 }

@@ -1,30 +1,34 @@
 <?php
 
-namespace App\Models\Empresa\Productos;
+namespace App\Models\Empresa\Categorias;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Empresa\Establecimiento;
+use App\Models\Admin\Establecimiento;
 use App\Models\Admin\User;
 
-class ListaPrecio extends Model
+class Categoria extends Model
 {
-    protected $table = 'lista_precios';
+    // Si deseas forzar la tabla, descomenta:
+    // protected $table = 'categorias';
 
     protected $fillable = [
         'nombre',
         'descripcion',
-        'estado',
-        'id_establecimiento',
+        'status',
         'id_user',
+        'id_establecimiento',
     ];
 
-    // Relaciones opcionales
+    protected $casts = [
+        'status' => 'string',
+    ];
+    // Relaciones
     public function establecimiento()
     {
         return $this->belongsTo(Establecimiento::class, 'id_establecimiento');
     }
 
-    public function usuario()
+    public function user()
     {
         return $this->belongsTo(User::class, 'id_user');
     }

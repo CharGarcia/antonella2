@@ -4,6 +4,7 @@ namespace App\Models\Empresa\Clientes;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Empresa\Personas\Persona;
+use App\Models\Empresa\Precios\ListaPrecios;
 
 
 class DatosCliente extends Model
@@ -18,7 +19,7 @@ class DatosCliente extends Model
         'segmento',
         'fecha_registro',
         'vendedor_asignado',
-        'lista_precios',
+        'id_lista_precios',
         'canal_venta',
         'zona',
         'clasificacion',
@@ -84,6 +85,11 @@ class DatosCliente extends Model
     public function contables()
     {
         return $this->hasOne(ContablesCliente::class, 'datos_cliente_id');
+    }
+
+    public function listaPrecios()
+    {
+        return $this->belongsTo(ListaPrecios::class, 'id_lista_precios');
     }
 }
 

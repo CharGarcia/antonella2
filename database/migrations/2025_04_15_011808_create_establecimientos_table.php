@@ -33,7 +33,7 @@ return new class extends Migration
             $table->unsignedBigInteger('consignacion_venta')->default(1);
             $table->unsignedTinyInteger('decimal_cantidad')->default(2);
             $table->unsignedTinyInteger('decimal_precio')->default(2);
-            $table->boolean('estado')->default(true); // activa o inactiva
+            $table->string('estado')->default('activo');
             $table->timestamps();
             $table->foreign('empresa_id')->references('id')->on('empresas')->onDelete('restrict');
         });

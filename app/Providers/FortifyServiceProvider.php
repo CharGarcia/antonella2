@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Admin\User;
-use App\Models\Empresa\Establecimiento;
+use App\Models\Admin\Establecimiento;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -59,7 +59,7 @@ class FortifyServiceProvider extends ServiceProvider
                 ]);
             }
 
-            if ($user->status != 1) {
+            if ($user->estado != 'activo') {
                 throw ValidationException::withMessages([
                     'cedula' => __('Tu usuario está inactivo. Por favor, contacta con el administrador.'),
                 ]);

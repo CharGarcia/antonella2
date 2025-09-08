@@ -59,7 +59,7 @@
                         <label for="user_id">Usuario</label>
                         <select name="user_id" id="user_id" class="form-control" required>
                         @foreach(
-                            \App\Models\Admin\User::where('status', true)
+                            \App\Models\Admin\User::where('estado', 'activo')
                                 ->whereIn('id', \DB::table('usuario_asignado')
                                     ->where('id_admin', auth()->id())
                                     ->pluck('id_user'))

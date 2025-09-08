@@ -33,12 +33,12 @@ class ProveedorController extends Controller
             ->orderBy('nombre')
             ->pluck('nombre', 'id');
 
-        $retencionRenta = RetencionSri::where('status', 'activo')
+        $retencionRenta = RetencionSri::where('estado', 'activo')
             ->where('impuesto', 'renta')
             ->orderBy('concepto')
             ->pluck('concepto', 'id');
 
-        $retencionIva = RetencionSri::where('status', 'activo')
+        $retencionIva = RetencionSri::where('estado', 'activo')
             ->where('impuesto', 'iva')
             ->orderBy('concepto')
             ->pluck('concepto', 'id');

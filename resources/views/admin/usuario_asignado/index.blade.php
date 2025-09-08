@@ -59,7 +59,7 @@
             <label for="user_asignado_id">Usuario</label>
             <select name="user_id" id="user_asignado_id" class="form-control" required>
               <option value="">-- Selecciona --</option>
-              @foreach(\App\Models\Admin\User::where('status', true)
+              @foreach(\App\Models\Admin\User::where('estado', 'activo')
                 ->whereHas('roles', fn($q) => $q->where('name', 'user'))
                 ->orderBy('name')->get() as $user)
                 <option value="{{ $user->id }}">{{ $user->name }} - {{ $user->email }}</option>
@@ -71,7 +71,7 @@
             <label for="admin_asignado_id">Asignar a</label>
             <select name="admin_id" id="admin_asignado_id" class="form-control" required>
               <option value="">-- Selecciona --</option>
-              @foreach(\App\Models\Admin\User::where('status', true)
+              @foreach(\App\Models\Admin\User::where('estado', 'activo')
                 ->whereHas('roles', fn($q) => $q->where('name', 'admin'))
                 ->orderBy('name')->get() as $user)
                 <option value="{{ $user->id }}">{{ $user->name }} - {{ $user->email }}</option>

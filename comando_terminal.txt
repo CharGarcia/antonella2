@@ -30,6 +30,6 @@ user123 para los 5 user.
 
 para guardar en git
 git add .
-git commit -m "mensaje"
+git commit -m "seeders"
 git push
 

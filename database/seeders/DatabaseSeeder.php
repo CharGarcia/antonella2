@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\Admin\User;
 use Illuminate\Database\Seeder;
+//use Spatie\Permission\PermissionRegistrar;
+//use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {

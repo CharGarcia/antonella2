@@ -61,7 +61,7 @@
                     <div class="form-group col-md-12 mb-2">
                         <label for="user_id">Usuario</label>
                     <select name="user_id" id="user_id" class="form-control" required>
-                        @foreach(\App\Models\Admin\User::where('status', true)->orderBy('name')->get() as $user)
+                        @foreach(\App\Models\Admin\User::where('estado', 'activo')->orderBy('name')->get() as $user)
                             <option value="{{ $user->id }}">{{ $user->name }} - {{ $user->email }}</option>
                         @endforeach
                     </select>

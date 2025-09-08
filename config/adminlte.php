@@ -61,6 +61,7 @@ return [
     | For detailed instructions you can look the logo section here:
     | https://github.com/jeroennoten/Laravel-AdminLTE/wiki/Basic-Configuration
     |
+    //vendor/adminlte/dist/img/camagare.png
     */
 
     'logo' => '<b>CaMaGaRe</b>',
@@ -110,7 +111,7 @@ return [
     */
 
     'preloader' => [
-        'enabled' => true,
+        'enabled' => false,
         'mode' => 'fullscreen',
         'img' => [
             'path' => 'vendor/adminlte/dist/img/camagare.png',

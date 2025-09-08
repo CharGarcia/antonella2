@@ -28,7 +28,7 @@
                         <th>Correo</th>
                         <th>Reenvio</th>
                         <th>Rol asignado</th>
-                        <th class="text-center">Status</th>
+                        <th class="text-center">Estado</th>
                     </tr>
                     <tr id="fila-filtros" class="filters" style="visibility: visible;">
                         <th><input type="text" class="form-control form-control-sm" placeholder="Nombre de usuario" /></th>
@@ -80,12 +80,12 @@ $(function () {
                 }
             },
                         columns: [
-                            { data: 'name', name: 'name' },
-                            { data: 'cedula', name: 'cedula' },
-                            { data: 'email', name: 'email' },
-                            { data: 'acciones', name: 'acciones', orderable: false, searchable: false },
-                            { data: 'roles', name: 'roles.name', orderable: false, searchable: false},
-                            { data: 'estado', name: 'estado'},
+                            { data: 'name',   name: 'users.name' },
+                            { data: 'cedula', name: 'users.cedula' },
+                            { data: 'email',  name: 'users.email' },
+                            { data: 'reenvio', orderable: false, searchable: false },
+                            { data: 'roles',  name: 'roles.name', searchable: true, orderable: false },
+                            { data: 'estado', name: 'users.estado', searchable: true, orderable: false },
             ],
             language: {
                url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json"

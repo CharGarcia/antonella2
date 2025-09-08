@@ -12,7 +12,7 @@ class Submenu extends Model
         'ruta',
         'icono',
         'orden',
-        'activo'
+        'estado'
     ];
 
     public function menu()

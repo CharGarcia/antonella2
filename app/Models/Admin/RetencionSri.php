@@ -15,7 +15,7 @@ class RetencionSri extends Model
         'porcentaje',
         'impuesto',
         'codigo_ats',
-        'status',
+        'estado',
         'vigencia_desde',
         'vigencia_hasta',
     ];

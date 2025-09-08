@@ -67,7 +67,7 @@ class RetencionSriController extends Controller
             'porcentaje' => 'required|numeric|min:0',
             'impuesto' => 'required|in:RENTA,IVA',
             'codigo_ats' => 'required|max:10',
-            'status' => 'required|in:activo,inactivo',
+            'estado' => 'required|in:activo,inactivo',
             'vigencia_desde' => 'nullable|date',
             'vigencia_hasta' => 'nullable|date|after_or_equal:vigencia_desde',
             'observaciones' => 'nullable|string|max:255',
@@ -85,7 +85,7 @@ class RetencionSriController extends Controller
             'porcentaje' => 'required|numeric|min:0',
             'impuesto' => 'required|in:RENTA,IVA',
             'codigo_ats' => 'required|max:10',
-            'status' => 'required|in:activo,inactivo',
+            'estado' => 'required|in:activo,inactivo',
             'vigencia_desde' => 'nullable|date',
             'vigencia_hasta' => 'nullable|date|after_or_equal:vigencia_desde',
             'observaciones' => 'nullable|string|max:255', // 👈 importante

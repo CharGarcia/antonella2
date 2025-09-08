@@ -17,38 +17,30 @@ class EmpresaSeeder extends Seeder
     public function run(): void
     {
         DB::transaction(function () {
-            // Asegura que exista el rol (no obligatorio, pero ayuda si luego buscas por rol)
+            // Mantener roles al día (opcional pero útil si usas roles en el seeder)
             app()[PermissionRegistrar::class]->forgetCachedPermissions();
             Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
 
             // 1) Crear empresas
             $empresas = Empresa::factory($this->empresasCantidad)->create();
 
-            // 2) Buscar super admin si existe (por rol o por email fallback)
-            $superAdmin = User::whereHas('roles', fn($q) =>
-                $q->where('name', 'super_admin')->where('guard_name', 'web')
-            )->first() ?: User::where('email', 'superadmin@demo.com')->first();
-
             foreach ($empresas as $empresa) {
                 $this->crearEstablecimientoYAsignarUsuarios(
                     $empresa,
                     nombre: $empresa->razon_social.' - Matriz',
-                    serie: '001-001',
-                    superAdmin: $superAdmin
+                    serie: '001-001'
                 );
 
                 $this->crearEstablecimientoYAsignarUsuarios(
                     $empresa,
                     nombre: $empresa->razon_social.' - Sucursal 002',
-                    serie: '002-001',
-                    superAdmin: $superAdmin
+                    serie: '002-001'
                 );
 
                 $this->crearEstablecimientoYAsignarUsuarios(
                     $empresa,
                     nombre: $empresa->razon_social.' - Sucursal 003',
-                    serie: '003-001',
-                    superAdmin: $superAdmin
+                    serie: '003-001'
                 );
             }
         });
@@ -57,10 +49,9 @@ class EmpresaSeeder extends Seeder
     private function crearEstablecimientoYAsignarUsuarios(
         Empresa $empresa,
         string $nombre,
-        string $serie,
-        ?User $superAdmin = null
+        string $serie
     ): void {
-        // Crea el establecimiento con columnas que SÍ existen en tu tabla
+        // Crea el establecimiento con columnas válidas
         $est = Establecimiento::create([
             'empresa_id'         => $empresa->id,
             'nombre_comercial'   => $nombre,
@@ -68,7 +59,7 @@ class EmpresaSeeder extends Seeder
             'direccion'          => $empresa->direccion ?? 'Sin dirección',
             'logo'               => null,
 
-            // Flags (tu tabla tiene DEFAULT 1, pero los dejamos explícitos por claridad)
+            // Flags
             'factura'            => 1,
             'nota_credito'       => 1,
             'nota_debito'        => 1,
@@ -83,22 +74,25 @@ class EmpresaSeeder extends Seeder
             'pedido'             => 1,
             'consignacion_venta' => 1,
 
-            // Decimales (tu tabla tiene DEFAULT 2)
+            // Decimales
             'decimal_cantidad'   => 2,
             'decimal_precio'     => 2,
 
             'estado'             => true,
         ]);
 
-        // Adjuntar usuarios al pivote establecimiento_usuario
-        $attachIds = [];
-        if ($superAdmin) {
-            $attachIds[] = $superAdmin->id;
+        // 🚫 No asignar nunca super_admin
+        // Selecciona usuarios que NO tengan el rol super_admin
+        $usuariosNoSuper = User::whereDoesntHave('roles', function ($q) {
+                $q->where('name', 'super_admin')->where('guard_name', 'web');
+            })
+            ->inRandomOrder()
+            ->limit(3)
+            ->pluck('id')
+            ->toArray();
+
+        if (!empty($usuariosNoSuper)) {
+            $est->usuarios()->syncWithoutDetaching($usuariosNoSuper);
         }
-
-        $randomUsers = User::inRandomOrder()->limit(3)->pluck('id')->toArray();
-        $attachIds = array_unique(array_merge($attachIds, $randomUsers));
-
-        $est->usuarios()->syncWithoutDetaching($attachIds);
     }
 }

@@ -33,7 +33,6 @@ class CategoriaController extends Controller
             ->first();
 
         $categoria = Categoria::where('id_establecimiento', $establecimientoId);
-
         return DataTables::eloquent($categoria)
             ->filter(function ($query) use ($request) {
                 foreach ($request->columns as $index => $column) {
@@ -47,7 +46,7 @@ class CategoriaController extends Controller
                                 $query->where('descripcion', 'like', "%$searchValue%");
                                 break;
                             case 2:
-                                $query->where('status', $searchValue);
+                                $query->where('estado', $searchValue);
                                 break;
                         }
                     }

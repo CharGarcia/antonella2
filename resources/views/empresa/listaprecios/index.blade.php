@@ -1,9 +1,9 @@
 @extends('adminlte::page')
 
-@section('title', 'Categorías')
+@section('title', 'Lista Precios')
 
 @section('content_header')
-    <h1>Gestión de Categorías</h1>
+    <h1>Gestión de listas de precios</h1>
 @stop
 
 @section('content')
@@ -18,7 +18,7 @@
                  @endif
 
                 @if(Permisos::puedeRealizarAccion('crear', $permisos))
-                    <button class="btn btn-success" id="btn-nuevo-categoria">
+                    <button class="btn btn-success" id="btn-nuevo-lista-precios">
                         <i class="fas fa-plus"></i> Nueva
                     </button>
                 @endif
@@ -27,7 +27,7 @@
 
              @if(Permisos::puedeRealizarAccion('ver', $permisos))
             <div class="table-responsive" style="max-height: 600px;">
-                <table class="table table-bordered table-striped nowrap" id="tabla-categorias" style="width:100%;">
+                <table class="table table-bordered table-striped nowrap" id="tabla-lista-precios" style="width:100%;">
                     <thead class="table-primary">
                         <tr>
                             <th>Nombre</th>
@@ -47,20 +47,20 @@
             @endif
         </div>
     </div>
-    @include('empresa.categorias.partials.modal_categoria')
+    @include('empresa.listaprecios.partials.modal_listaprecios')
 @stop
 
 @section('js')
 <script>
 $(function () {
-    let tabla = $('#tabla-categorias').DataTable({
+    let tabla = $('#tabla-lista-precios').DataTable({
         dom: '<"row"<"col-md-2 text-left">>rt<"row"<"col-md-12 text-center"p>>',
         processing: false,
         serverSide: true,
         fixedHeader: true,
         autoWidth: true,
         ajax: {
-            url: '{{ route("categorias.data") }}',
+            url: '{{ route("lista-precios.data") }}',
             data: function (d) {
                 $('.filters th').each(function (i) {
                     const input = $(this).find('input, select');

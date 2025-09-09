@@ -109,7 +109,7 @@
         </form>
     </div>
 </div>
-
+@include('empresa.listaprecios.partials.modal_listaprecios')
 @push('js')
 <script>
     $(document).ready(function () {

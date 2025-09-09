@@ -14,5 +14,7 @@ class DatabaseSeeder extends Seeder
         $this->call(PermissionSeeder::class);
         $this->call(UserSeeder::class);
         $this->call(EmpresaSeeder::class);
+        $this->call([FormasPagoSriSeeder::class]);
+        $this->call([TarifaIvaSeeder::class]);
     }
 }

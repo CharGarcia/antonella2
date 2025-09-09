@@ -1,9 +1,10 @@
 <?php
-namespace App\Models\Empresa\Precios;
+
+namespace App\Models\Empresa\ListaPrecios;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Empresa\Clientes\DatosCliente;
-//use App\Models\Producto;
+
 
 class ListaPrecios extends Model
 {

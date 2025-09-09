@@ -12,7 +12,7 @@ use Illuminate\Validation\Rule;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\Empresa\Personas\Persona;
 use App\Models\Empresa\Clientes\DocumentoCliente;
-use App\Models\Empresa\Productos\ListaPrecio;
+use App\Models\Empresa\ListaPrecios\ListaPrecios;
 use App\Models\Admin\FormasPagoSri;
 use Illuminate\Support\Carbon;
 
@@ -27,14 +27,14 @@ class ClienteController extends Controller
             ->orderBy('nombre')
             ->pluck('nombre', 'id');
 
-        /* $listasPrecios = ListaPrecio::where('id_establecimiento', session('establecimiento_id'))
-            ->where('estado', true)
+        $listasPrecios = ListaPrecios::where('id_establecimiento', session('establecimiento_id'))
+            ->where('estado', 'activo')
             ->orderBy('nombre')
-            ->pluck('nombre', 'id'); */
+            ->pluck('nombre', 'id')->toArray();
 
         $formasPago = FormasPagoSri::pluck('descripcion', 'codigo'); // O el campo adecuado
 
-        return view('empresa.clientes.index', compact('formasPago', 'vendedores'));
+        return view('empresa.clientes.index', compact('formasPago', 'vendedores', 'listasPrecios'));
     }
 
     public function getData(Request $request)

@@ -31,6 +31,12 @@
             'col' => 'col-md-6'
         ])
 
+        {{-- @include('components.select', [
+            'nombre' => 'forma_pago',
+            'label' => 'Forma habitual de cobro',
+            'opciones' => $formasPago, 'mostrarPrimeraOpcion' => false, 'col' => 'col-md-4'
+        ]) --}}
+
         @include('components.textarea', ['nombre' => 'observaciones_crediticias', 'label' => 'Observaciones crediticias'])
     </div>
 </div>

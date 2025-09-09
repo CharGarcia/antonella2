@@ -21,6 +21,7 @@ use App\Http\Controllers\Empresa\CompradorController;
 use App\Http\Controllers\empresa\ProveedorController;
 use App\Http\Controllers\Empresa\PersonaController;
 use App\Http\Controllers\Empresa\CategoriaController;
+use App\Http\Controllers\Empresa\ListaPreciosController;
 
 
 Route::get('/', function () {
@@ -56,23 +57,6 @@ Route::middleware(['auth'])
     });
 
 
-// >>> CategoriaModule START
-//permiso admin user: gestionar-categorias
-//ruta para submenus: categorias.categorias
-Route::middleware(['auth', 'verificar.permisos.submenu', 'can:gestionar-categorias'])
-    ->prefix('empresa/categorias')
-    ->name('categorias.')
-    ->group(function () {
-        Route::get('/buscar', [CategoriaController::class, 'buscar'])->name('buscar'); // opcional si implementas buscar()
-        Route::get('/', [CategoriaController::class, 'index'])->name('categorias');
-        Route::get('/data', [CategoriaController::class, 'getData'])->name('data');
-        Route::post('/crear', [CategoriaController::class, 'create'])->name('create');
-        Route::post('/', [CategoriaController::class, 'store'])->name('store');
-        Route::get('/{categoria}/show', [CategoriaController::class, 'show'])->name('show');
-        Route::put('/{categoria}', [CategoriaController::class, 'update'])->name('update');
-        Route::delete('/{categoria}', [CategoriaController::class, 'destroy'])->name('destroy');
-    });
-// <<< CategoriaModule END
 
 //para vendedores
 //permiso admin user: gestionar-vendedores
@@ -307,3 +291,37 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{id}', [RetencionSriController::class, 'show'])->name('show'); // ponerla al final
     });
 });
+
+// >>> CategoriaModule START
+//permiso admin user: gestionar-categorias
+//ruta para submenus: categorias.categorias
+Route::middleware(['auth', 'verificar.permisos.submenu', 'can:gestionar-categorias'])
+    ->prefix('empresa/categorias')
+    ->name('categorias.')
+    ->group(function () {
+        Route::get('/buscar', [CategoriaController::class, 'buscar'])->name('buscar'); // opcional si implementas buscar()
+        Route::get('/', [CategoriaController::class, 'index'])->name('categorias');
+        Route::get('/data', [CategoriaController::class, 'getData'])->name('data');
+        Route::post('/crear', [CategoriaController::class, 'create'])->name('create');
+        Route::post('/', [CategoriaController::class, 'store'])->name('store');
+        Route::get('/{categoria}/show', [CategoriaController::class, 'show'])->name('show');
+        Route::put('/{categoria}', [CategoriaController::class, 'update'])->name('update');
+        Route::delete('/{categoria}', [CategoriaController::class, 'destroy'])->name('destroy');
+    });
+// <<< CategoriaModule END
+
+//permiso admin user: gestionar-lista-precios
+//ruta para submenus: lista-precios.lista-precios
+Route::middleware(['auth', 'verificar.permisos.submenu', 'can:gestionar-lista-precios'])
+    ->prefix('empresa/lista-precios')
+    ->name('lista-precios.')
+    ->group(function () {
+        Route::get('/buscar', [ListaPreciosController::class, 'buscar'])->name('buscar'); // opcional si implementas buscar()
+        Route::get('/', [ListaPreciosController::class, 'index'])->name('lista-precios'); //este name es el nombre de la ruta ej: lista-precios.lista-precios
+        Route::get('/data', [ListaPreciosController::class, 'getData'])->name('data');
+        Route::post('/crear', [ListaPreciosController::class, 'create'])->name('create'); // si usas modal
+        Route::post('/', [ListaPreciosController::class, 'store'])->name('store');
+        Route::get('/{listaPrecio}/show', [ListaPreciosController::class, 'show'])->name('show');
+        Route::put('/{listaPrecio}', [ListaPreciosController::class, 'update'])->name('update');
+        Route::delete('/{listaPrecio}', [ListaPreciosController::class, 'destroy'])->name('destroy');
+    });

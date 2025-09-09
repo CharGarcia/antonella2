@@ -3,7 +3,7 @@
     <div class="card">
         <div class="card-body">
     <div class="row">
-                        @include('components.input', ['nombre' => 'nombre_comercial', 'label' => 'Nombre comercial', 'col' => 'col-md-12'])
+        @include('components.input', ['nombre' => 'nombre_comercial', 'label' => 'Nombre comercial', 'col' => 'col-md-12'])
         @include('components.input', ['nombre' => 'codigo_interno', 'label' => 'Código Interno', 'col' => 'col-md-4'])
         @include('components.select', [
             'nombre' => 'categoria_cliente',
@@ -23,11 +23,19 @@
             'opciones' => $vendedores, 'mostrarPrimeraOpcion' => true, 'col' => 'col-md-4'
         ])
 
-        @include('components.select', [
+        {{-- Lista de Precios + botón para crear (abre TU modal existente) --}}
+        @include('components.select-with-button', [
             'nombre' => 'id_lista_precios',
-            'label' => 'Lista de Precios',
-            'opciones' => $listasPrecios, 'mostrarPrimeraOpcion' => false, 'col' => 'col-md-4'
+            'label'  => 'Lista de Precios',
+            'opciones' => $listasPrecios,          // array id => nombre (si es Collection usa ->toArray() en el controlador)
+            'mostrarPrimeraOpcion' => true,
+            'col' => 'col-md-4',
+            'buttonIcon' => 'fas fa-plus',
+            'buttonClass' => 'btn btn-outline-primary',
+            'buttonTitle' => 'Crear nueva lista de precios',
+            'modalId' => 'modal-lista-precios',      // 👈 ID de TU modal de listas
         ])
+
         @include('components.select', [
             'nombre' => 'canal_venta',
             'label' => 'Canal de Venta',

@@ -14,22 +14,9 @@ class {{ module }}Request extends FormRequest
 
     public function rules(): array
     {
-        /**
-         * 1) Reglas base generadas por parseFields() en MakeModule
-         *    {{ validationRules }} quedará como array plano tipo:
-         *    'campo' => ['required','string','max:150'],
-         *    'status' => ['required','in:activo,inactivo'],
-         *    etc.
-         */
         $rules = [
             {{ validationRules }}
         ];
-
-        /**
-         * 2) Regla de unicidad compuesta para `nombre` por establecimiento (opcional)
-         *    - Solo se aplica si el formulario trae `nombre`
-         *    - Ignora el ID en PUT/PATCH (soporta route model o ID)
-         */
         if ($this->has('nombre')) {
             $establecimientoId = session('establecimiento_id');
             $nombreNormalizado = strtolower(trim((string) $this->input('nombre')));

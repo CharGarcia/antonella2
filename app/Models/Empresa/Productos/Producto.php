@@ -1,27 +1,28 @@
 <?php
 
-namespace App\Models\Empresa\Categorias;
+namespace App\Models\Empresa\Productos;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Models\Admin\Establecimiento;
 use App\Models\Admin\User;
+use App\Models\Admin\TarifaIva;
 
-class Categoria extends Model
+use Illuminate\Database\Eloquent\Model;
+
+class Producto extends Model
 {
-    // Si deseas forzar la tabla, descomenta:
-    // protected $table = 'categorias';
+    protected $table = 'productos';
 
     protected $fillable = [
-        'nombre',
+        'codigo',
         'descripcion',
+        'tipo_id',
+        'tarifa_iva_id',
+        'precio_base',
         'estado',
-        'id_user',
         'id_establecimiento',
+        'id_user'
     ];
 
-    protected $casts = [
-        'estado' => 'string',
-    ];
     // Relaciones
     public function establecimiento()
     {
@@ -31,5 +32,10 @@ class Categoria extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user');
+    }
+
+    public function tarifaIva()
+    {
+        return $this->belongsTo(TarifaIva::class, 'tarifa_iva_id');
     }
 }

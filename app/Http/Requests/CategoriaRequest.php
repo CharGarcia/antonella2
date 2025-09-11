@@ -29,18 +29,21 @@ class CategoriaRequest extends FormRequest
         }
 
         return [
-            'nombre' => ['required', 'string', 'max:150', $uniqueNombre],
-            'descripcion' => ['nullable', 'string', 'max:255'],
-            'status' => ['required', 'in:activo,inactivo'],
+            'nombre' => ['required', 'string', 'max:150', 'regex:/^[\pL\pN\-\_\.\,\(\)]+(\s[\pL\pN\-\_\.\,\(\)]+)*$/u', $uniqueNombre],
+            'descripcion' => ['nullable', 'string', 'max:255', 'regex:/^[\pL\pN\s\-\_\.\,\(\)]+$/u'],
+            'estado' => 'required|in:activo,inactivo',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'nombre.required' => 'El nombre es obligatorio.',
-            'nombre.unique' => 'Ya existe una categoría con ese nombre.',
-            'status.in' => 'El estado debe ser activo o inactivo.',
+            'nombre.required'     => 'El nombre es obligatorio.',
+            'nombre.unique'       => 'Ya existe una categoría con ese nombre.',
+            'nombre.regex'        => 'El nombre contiene caracteres no permitidos.',
+            'descripcion.regex'   => 'La descripción contiene caracteres no permitidos.',
+            'estado.required'     => 'El estado es obligatorio.',
+            'estado.in'           => 'El estado debe ser "activo" o "inactivo".',
         ];
     }
 }

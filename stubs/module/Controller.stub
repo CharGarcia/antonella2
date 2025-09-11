@@ -22,7 +22,7 @@ class {{ module }}Controller extends Controller
         $submenuId = session('submenu_id');
 
         if (!$establecimientoId || !$submenuId) {
-            abort(403, 'Establecimiento o Submenú no seleccionado.');
+            abort(403, 'Establecimiento no seleccionado.');
         }
 
         $permisos = SubmenuEstablecimientoUsuario::where('user_id', $user->id)
@@ -45,7 +45,7 @@ class {{ module }}Controller extends Controller
                                 $query->where('descripcion', 'like', "%$searchValue%");
                                 break;
                             case 2:
-                                $query->where('status', $searchValue);
+                                $query->where('estado', $searchValue);
                                 break;
                         }
                     }
@@ -62,12 +62,12 @@ class {{ module }}Controller extends Controller
                 $botones .= '</div>';
                 return $botones;
             })
-            ->addColumn('status', function ($datos_consulta) {
-                return $datos_consulta->status === 'Activo'
+            ->addColumn('estado', function ($datos_consulta) {
+                return $datos_consulta->estado === 'activo'
                     ? '<span class="badge badge-success"><i class="fas fa-check-circle"></i> Activo</span>'
                     : '<span class="badge badge-danger"><i class="fas fa-times-circle"></i> Inactivo</span>';
             })
-            ->rawColumns(['acciones', 'status'])
+            ->rawColumns(['acciones', 'estado'])
             ->make(true);
     }
 
@@ -90,8 +90,7 @@ class {{ module }}Controller extends Controller
     public function update({{ module }}Request $request, {{ module }} ${{ moduleLower }})
     {
         ${{ moduleLower }}->update($request->validated());
-
-        return back()->with('success', '{{ module }} actualizada.');
+        return response()->json(['message' => '{{ module }} actualizada.']);
     }
 
         public function destroy({{ module }} ${{ moduleLower }})

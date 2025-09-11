@@ -175,7 +175,7 @@ $(document).on('click', '.editar-lista-precios', function () {
         $('#lista-precios_id').val(res.id);
         $('#nombre').val(res.nombre);
         $('#descripcion').val(res.descripcion);
-        $('#status').val(res.status ?? 'activo');
+        $('#estado').val(res.estado ?? 'activo');
 
         $('#modalListaPreciosLabel').html('<i class="fas fa-edit text-warning mr-2"></i> Editar lista de precios');
         $('#modal-lista-precios').modal('show');

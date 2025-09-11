@@ -1,5 +1,8 @@
 use App\Http\Controllers\Empresa\{{ module }}Controller;
 
+
+//permiso admin user: gestionar-{{ plural }}
+//ruta para submenus: {{ plural }}.{{ plural }}
     Route::middleware(['auth', 'verificar.permisos.submenu', 'can:gestionar-{{ plural }}'])
     ->prefix('empresa/{{ plural }}')
     ->name('{{ plural }}.')

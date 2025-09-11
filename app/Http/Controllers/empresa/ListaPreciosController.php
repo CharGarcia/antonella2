@@ -70,38 +70,31 @@ class ListaPreciosController extends Controller
                 $botones .= '</div>';
                 return $botones;
             })
-            ->addColumn('estado_badge', function ($listaPrecio) {
+            ->addColumn('estado', function ($listaPrecio) {
                 return $listaPrecio->estado === 'activo'
                     ? '<span class="badge badge-success"><i class="fas fa-check-circle"></i> Activo</span>'
                     : '<span class="badge badge-danger"><i class="fas fa-times-circle"></i> Inactivo</span>';
             })
-            ->rawColumns(['acciones', 'estado_badge'])
+            ->rawColumns(['acciones', 'estado'])
             ->make(true);
     }
 
-    /* public function store(ListaPreciosRequest $request)
-    {
-        $data = $request->validated();
-        $data['id_user'] = Auth::id();
-        $data['id_establecimiento'] = session('establecimiento_id');
-
-        ListaPrecios::create($data);
-
-        return back()->with('success', 'Lista de precios creada.');
-    } */
     public function store(ListaPreciosRequest $request)
     {
-        // Toma solo lo validado y descarta cualquier 'estado' que venga del cliente
+        // Toma solo campos válidos, excluye el estado que forzamos a 'activo'
         $data = $request->safe()->except('estado');
 
-        // Seteos de servidor
+        // Sanitización adicional (evita espacios y símbolos indeseados)
+        $data['nombre'] = trim($data['nombre']);
+        $data['descripcion'] = isset($data['descripcion']) ? trim($data['descripcion']) : null;
+
+        // Valores controlados por el servidor
         $data['estado'] = 'activo';
         $data['id_user'] = Auth::id();
         $data['id_establecimiento'] = session('establecimiento_id');
 
         $lp = ListaPrecios::create($data);
 
-        // Soporte para AJAX (tu modal)
         if ($request->ajax()) {
             return response()->json([
                 'id'      => $lp->id,
@@ -116,9 +109,18 @@ class ListaPreciosController extends Controller
 
     public function update(ListaPreciosRequest $request, ListaPrecios $listaPrecio)
     {
-        $listaPrecio->update($request->validated());
-        return back()->with('success', 'Lista de precios actualizada.');
+        // Toma solo campos válidos y excluye 'estado' si lo vas a controlar desde el sistema
+        $data = $request->safe()->only(['nombre', 'descripcion']);
+
+        // Limpieza adicional
+        $data['nombre'] = trim($data['nombre']);
+        $data['descripcion'] = isset($data['descripcion']) ? trim($data['descripcion']) : null;
+
+        // Actualizar
+        $listaPrecio->update($data);
+        return response()->json(['message' => 'Lista de precios actualizada.']);
     }
+
 
     public function show(ListaPrecios $listaPrecio)
     {

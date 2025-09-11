@@ -15,6 +15,11 @@ php artisan make:module Categoria \
 segundo
 php artisan migrate
 
+para productos
+php artisan make:module Producto --plural=productos --fields="codigo:string(200):index, descripcion:string(255):index, tipo_id:foreignId:constrained=tipos_producto, tarifa_iva_id:foreignId:constrained=tarifa_iva, precio_base:decimal(15,6), estado:string, id_establecimiento:foreignId:constrained=establecimientos:onDelete=cascade, id_user:foreignId:nullable:constrained=users:onDelete=set null" --force
+
+
+
 
 
 seeders
@@ -30,6 +35,6 @@ user123 para los 5 user.
 
 para guardar en git
 git add .
-git commit -m "seeders2"
+git commit -m "listaprecios"
 git push
 

@@ -63,12 +63,12 @@ class CategoriaController extends Controller
                 $botones .= '</div>';
                 return $botones;
             })
-            ->addColumn('status', function ($categoria) {
-                return $categoria->status === 'activo'
+            ->addColumn('estado', function ($categoria) {
+                return $categoria->estado === 'activo'
                     ? '<span class="badge badge-success"><i class="fas fa-check-circle"></i> Activo</span>'
                     : '<span class="badge badge-danger"><i class="fas fa-times-circle"></i> Inactivo</span>';
             })
-            ->rawColumns(['acciones', 'status'])
+            ->rawColumns(['acciones', 'estado'])
             ->make(true);
     }
 
@@ -76,22 +76,35 @@ class CategoriaController extends Controller
     public function store(CategoriaRequest $request)
     {
         $data = $request->validated();
+
         $data['id_user'] = Auth::id();
         $data['id_establecimiento'] = session('establecimiento_id');
+
+        // 🧹 Limpieza de espacios y caracteres no deseados en el nombre
+        $data['nombre'] = preg_replace('/\s+/', ' ', trim($data['nombre']));
+
+        // Opcional: convertir a mayúsculas
+        // $data['nombre'] = strtoupper($data['nombre']);
 
         Categoria::create($data);
 
         return back()->with('success', 'Categoría creada.');
     }
 
-
     public function update(CategoriaRequest $request, Categoria $categoria)
     {
-        $categoria->update($request->validated());
+        $data = $request->validated();
 
-        return back()->with('success', 'Categoría actualizada.');
+        // 🧹 Limpieza del nombre
+        $data['nombre'] = preg_replace('/\s+/', ' ', trim($data['nombre']));
+
+        // Opcional: convertir a mayúsculas
+        // $data['nombre'] = strtoupper($data['nombre']);
+
+        $categoria->update($data);
+
+        return response()->json(['message' => 'Categoría actualizada.']);
     }
-
 
     public function show(Categoria $categoria)
     {

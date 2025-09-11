@@ -159,7 +159,7 @@ $(document).on('click', '.editar-categoria', function () {
         $('#categoria_id').val(res.id);
         $('#nombre').val(res.nombre);
         $('#descripcion').val(res.descripcion);
-        $('#status').val(res.status ?? 'activo');
+        $('#estado').val(res.estado ?? 'activo');
 
         $('#modalCategoriaLabel').html('<i class="fas fa-edit text-warning mr-2"></i> Editar Categoría');
         $('#modal-categoria').modal('show');

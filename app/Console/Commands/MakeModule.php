@@ -37,7 +37,7 @@ class MakeModule extends Command
         $modelPath = base_path("app/Models/Empresa/{$pluralStudly}/{$name}.php");
         $ctrlPath    = base_path("app/Http/Controllers/Empresa/{$name}Controller.php");
         $request    = base_path("app/Http/Requests/{$name}Request.php");
-        $viewsDir    = base_path("resources/views/{$plural}");
+        $viewsDir    = base_path("resources/views/empresa/{$plural}");
         $partialsDir = "{$viewsDir}/partials";
         $tabsDir     = "{$viewsDir}/tabs";
         $indexPath   = "{$viewsDir}/index.blade.php";
@@ -173,24 +173,24 @@ class MakeModule extends Command
             $fillable[] = "'{$col}'";
 
             // ----- Caso especial: status => enum('Activo','Inactivo') -----
-            if ($col === 'status') {
+            if ($col === 'estado') {
                 // Migración
-                $mig[] = "\$table->enum('status', ['activo','inactivo'])->default('activo')->index();";
+                $mig[] = "\$table->enum('estado', ['activo','inactivo'])->default('activo')->index();";
 
                 // Validación
-                $rules[] = "'status' => ['required','in:activo,inactivo'],";
+                $rules[] = "'estado' => ['required','in:activo,inactivo'],";
 
                 // Filtro columna
-                $filters[] = "<th><select class=\"form-select form-select-sm\"><option value=\"\">Todos</option><option value=\"activo\">Activo</option><option value=\"inactivo\">Inactivo</option></select></th>";
+                $filters[] = "<th><select class=\"form-control form-control-sm\"><option value=\"\">Todos</option><option value=\"activo\">Activo</option><option value=\"inactivo\">Inactivo</option></select></th>";
 
                 // DataTables (server-side ya formatea con badge si quieres; aquí solo columna)
-                $dtCols[]  = "{ data: 'status', name: 'status', orderable:false, searchable:false },";
+                $dtCols[]  = "{ data: 'estado', name: 'estado', orderable:false, searchable:false },";
 
                 // Formulario
                 $form[] = <<<HTML
 <div class="col-md-4 mb-3">
   <label class="form-label">Estado *</label>
-  <select name="status" class="form-select" required>
+  <select name="estado" class="form-select" required>
     <option value="activo">Activo</option>
     <option value="inactivo">Inactivo</option>
   </select>
@@ -198,11 +198,11 @@ class MakeModule extends Command
 HTML;
 
                 // JS para rellenar modal en edición
-                $fillJs[] = "$('[name=\"status\"]').val(data.status ?? 'activo');";
+                $fillJs[] = "$('[name=\"estado\"]').val(data.estado ?? 'activo');";
 
                 // Encabezado y mapa
                 $headers[] = "<th>Estado</th>";
-                $map[]     = "{$idx} => 'status',";
+                $map[]     = "{$idx} => 'estado',";
                 $idx++;
                 continue;
             }
@@ -224,7 +224,7 @@ HTML;
                 $rules[] = "'{$col}' => ['required','boolean'],";
 
                 // Filtro select 1/0
-                $filters[] = "<th><select class=\"form-select form-select-sm\"><option value=\"\">Todos</option><option value=\"1\">Activo</option><option value=\"0\">Inactivo</option></select></th>";
+                $filters[] = "<th><select class=\"form-control form-control-sm\"><option value=\"\">Todos</option><option value=\"1\">Activo</option><option value=\"0\">Inactivo</option></select></th>";
 
                 // Columna DT (no ordenable/buscable en cliente)
                 $dtCols[]  = "{ data: '{$col}', name: '{$col}', orderable:false, searchable:false },";
@@ -235,8 +235,8 @@ HTML;
 <div class="col-md-3 mb-3">
   <label class="form-label">{$this->labelize($col)}{$requiredStar}</label>
   <select name="{$col}" class="form-select">
-    <option value="1">Activo</option>
-    <option value="0">Inactivo</option>
+    <option value="activo">Activo</option>
+    <option value="inactivo">Inactivo</option>
   </select>
 </div>
 HTML;

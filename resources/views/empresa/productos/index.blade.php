@@ -1,10 +1,10 @@
 
 @extends('adminlte::page')
 
-@section('title', '{{ modulePlural }}')
+@section('title', 'Productos')
 
 @section('content_header')
-     <h1>Gestión de {{ modulePlural }}</h1>
+     <h1>Gestión de Productos</h1>
 @stop
 
 @section('content')
@@ -19,7 +19,7 @@
                  @endif
 
                 @if(Permisos::puedeRealizarAccion('crear', $permisos))
-                    <button class="btn btn-success" id="btn-nuevo-{{ moduleLower }}">
+                    <button class="btn btn-success" id="btn-nuevo-producto">
                         <i class="fas fa-plus"></i> Nuevo
                     </button>
                 @endif
@@ -27,16 +27,49 @@
 
                          @if(Permisos::puedeRealizarAccion('ver', $permisos))
             <div class="table-responsive" style="max-height: 600px;">
-                <table class="table table-bordered table-striped nowrap" id="tabla-{{ plural }}" style="width:100%;">
+                <table class="table table-bordered table-striped nowrap" id="tabla-productos" style="width:100%;">
                     <thead class="table-primary">
                         <tr>
-                        {{ tableHeaders }}
+                        <th>Código</th>
+                        <th>Descripción</th>
+                        <th>Tipo</th>
+                        <th>Tarifa Iva</th>
+                        <th>Precio Base</th>
+                        <th>Estado</th>
                         <th>Acciones</th>
                         </tr>
                         <tr id="fila-filtros" class="filters">
-                            {{ filterInputs }}
-                            <th></th>
-                        </tr>
+    <th><input class="form-control form-control-sm" placeholder="Código"></th>
+    <th><input class="form-control form-control-sm" placeholder="Descripción"></th>
+    <th>
+        <select class="form-control form-control-sm">
+            <option value="">Todos</option>
+            <option value="Producto">Producto</option>
+            <option value="Servicio">Servicio</option>
+            <option value="Activo fijo">Activo fijo</option>
+            <option value="Kit/combo">Kit/combo</option>
+            <option value="Bien no inventariable">Bien no inventariable</option>
+        </select>
+    </th>
+    <th>
+    <select class="form-control form-control-sm">
+        <option value="">Todos</option>
+        @foreach ($tarifaIva as $codigo => $descripcion)
+            <option value="{{ $descripcion }}">{{ $descripcion }}</option>
+        @endforeach
+    </select>
+</th>
+    <th><input class="form-control form-control-sm" placeholder="Precio Base"></th>
+    <th>
+        <select class="form-control form-control-sm">
+            <option value="">Todos</option>
+            <option value="activo">Activo</option>
+            <option value="inactivo">Inactivo</option>
+        </select>
+    </th>
+    <th></th>
+</tr>
+
                     </thead>
                 </table>
             </div>
@@ -44,20 +77,20 @@
         </div>
     </div>
 {{-- Modal (create/edit) --}}
-@include('empresa.{{ plural }}.partials.modal_{{ moduleLower }}')
+@include('empresa.productos.partials.modal_producto')
 @stop
 
 @section('js')
 <script>
 $(function () {
-    let tabla = $('#tabla-{{ plural }}').DataTable({
+    let tabla = $('#tabla-productos').DataTable({
         dom: '<"row"<"col-md-2 text-left">>rt<"row"<"col-md-12 text-center"p>>',
         processing: false,
         serverSide: true,
         fixedHeader: true,
         autoWidth: true,
         ajax: {
-            url: '{{ route("{{ plural }}.data") }}',
+            url: '{{ route("productos.data") }}',
             data: function (d) {
                 $('.filters th').each(function (i) {
                     const input = $(this).find('input, select');
@@ -68,7 +101,12 @@ $(function () {
             }
         },
         columns: [
-            {{ dtColumns }}
+            { data: 'codigo', name: 'codigo' },
+            { data: 'descripcion', name: 'descripcion' },
+            { data: 'tipo', name: 'tipo' },
+            { data: 'tarifa_iva', name: 'tarifa_iva' },
+            { data: 'precio_base', name: 'precio_base'},
+            { data: 'estado', name: 'estado', orderable:false, searchable:false },
             { data: 'acciones', name: 'acciones', orderable:false, searchable:false },
         ],
         language: {

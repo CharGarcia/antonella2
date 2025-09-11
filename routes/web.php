@@ -22,6 +22,7 @@ use App\Http\Controllers\empresa\ProveedorController;
 use App\Http\Controllers\Empresa\PersonaController;
 use App\Http\Controllers\Empresa\CategoriaController;
 use App\Http\Controllers\Empresa\ListaPreciosController;
+use App\Http\Controllers\Empresa\ProductoController;
 
 
 Route::get('/', function () {
@@ -325,3 +326,23 @@ Route::middleware(['auth', 'verificar.permisos.submenu', 'can:gestionar-lista-pr
         Route::put('/{listaPrecio}', [ListaPreciosController::class, 'update'])->name('update');
         Route::delete('/{listaPrecio}', [ListaPreciosController::class, 'destroy'])->name('destroy');
     });
+
+
+// >>> ProductoModule START
+//permiso admin user: gestionar-productos
+//ruta para submenus: productos.productos
+Route::middleware(['auth', 'verificar.permisos.submenu', 'can:gestionar-productos'])
+    ->prefix('empresa/productos')
+    ->name('productos.')
+    ->group(function () {
+        Route::get('/buscar', [ProductoController::class, 'buscar'])->name('buscar'); // opcional si implementas buscar()
+        Route::get('/', [ProductoController::class, 'index'])->name('productos');
+        Route::get('/data', [ProductoController::class, 'getData'])->name('data');
+        Route::get('/siguiente-codigo', [ProductoController::class, 'obtenerSiguienteCodigo'])->name('siguiente-codigo');
+        Route::post('/crear', [ProductoController::class, 'create'])->name('create');
+        Route::post('/', [ProductoController::class, 'store'])->name('store');
+        Route::get('/{producto}/show', [ProductoController::class, 'show'])->name('show');
+        Route::put('/{producto}', [ProductoController::class, 'update'])->name('update');
+        Route::delete('/{producto}', [ProductoController::class, 'destroy'])->name('destroy');
+    });
+// <<< ProductoModule END

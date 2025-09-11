@@ -38,7 +38,11 @@
                         <tr id="fila-filtros" class="filters">
                             <th><input class="form-control form-control-sm" placeholder="Nombre"></th>
                             <th><input class="form-control form-control-sm" placeholder="Descripcion"></th>
-                            <th><select class="form-control form-control-sm"><option value="">Todos</option><option value="activo">Activo</option><option value="inactivo">Inactivo</option></select></th>
+                            <th><select class="form-control form-control-sm">
+                                <option value="">Todos</option>
+                                <option value="activo">Activo</option>
+                                <option value="inactivo">Inactivo</option>
+                            </select></th>
                             <th></th>
                         </tr>
                     </thead>

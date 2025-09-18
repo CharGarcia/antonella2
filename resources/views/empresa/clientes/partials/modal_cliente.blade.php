@@ -32,8 +32,6 @@
     }
 
 </style>
-
-
 <div class="modal fade" id="modal-cliente" tabindex="-1" data-backdrop="static" role="dialog" aria-labelledby="modalClienteLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <form id="form-cliente">

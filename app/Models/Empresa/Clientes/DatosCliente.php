@@ -4,7 +4,7 @@ namespace App\Models\Empresa\Clientes;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Empresa\Personas\Persona;
-use App\Models\Empresa\Precios\ListaPrecios;
+use App\Models\Empresa\ListaPrecios\ListaPrecios;
 
 
 class DatosCliente extends Model

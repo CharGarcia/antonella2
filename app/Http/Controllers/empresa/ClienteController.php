@@ -568,7 +568,6 @@ class ClienteController extends Controller
         return response()->json($cliente);
     }
 
-
     //para eliminar los documentos cargados en clientes
     public function eliminarDocumento(DocumentoCliente $documento)
     {

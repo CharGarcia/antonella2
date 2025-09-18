@@ -10,15 +10,22 @@ use Yajra\DataTables\Facades\DataTables;
 use App\Models\Admin\SubmenuEstablecimientoUsuario;
 use App\Http\Requests\ProductoRequest;
 use App\Models\Admin\TarifaIva;
+use App\Models\Empresa\ListaPrecios\ListaPrecios;
 
 class ProductoController extends Controller
 {
     public function index()
     {
+
+        $listasPrecios = ListaPrecios::where('id_establecimiento', session('establecimiento_id'))
+            ->where('estado', 'activo')
+            ->orderBy('nombre')
+            ->pluck('nombre', 'id')->toArray();
+
         $tarifaIva = TarifaIva::where('estado', 'activo')
             ->orderBy('descripcion')
             ->pluck('descripcion', 'codigo');
-        return view('empresa.productos.index', compact('tarifaIva'));
+        return view('empresa.productos.index', compact('tarifaIva', 'listasPrecios'));
     }
 
 

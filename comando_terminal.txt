@@ -35,6 +35,6 @@ user123 para los 5 user.
 
 para guardar en git
 git add .
-git commit -m "listaprecios"
+git commit -m "productos"
 git push
 

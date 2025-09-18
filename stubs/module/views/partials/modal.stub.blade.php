@@ -15,7 +15,7 @@
                     <!-- Pestañas con íconos -->
                     <ul class="nav nav-tabs mb-3" id="{{ moduleLower }}Tabs" role="tablist">
                         <li class="nav-item">
-                            <a class="nav-link active" data-toggle="tab" href="#tab-general">
+                            <a class="nav-link active" id="tab-general-tab" data-toggle="tab" href="#tab-general" role="tab">
                                 <i class="fas fa-user me-1"></i> General
                             </a>
                         </li>
